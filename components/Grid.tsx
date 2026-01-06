@@ -8,6 +8,7 @@ import { useSequencer, INITIAL_STATE } from '@/hooks/useSequencer'
 import { urlFor } from '@/lib/sanity'
 import { filterTrulyVisibleBlocks, getBlockRanksByDistance, getBlockCenter, getDistance } from '@/hooks/useProximity'
 import { MOTION_CONFIG } from '@/config/motion'
+import { getTextColor } from '@/utils/colorUtils'
 import GridBlock from './GridBlock'
 import Viewer from './Viewer'
 import ViewerUI from './ViewerUI'
@@ -324,8 +325,9 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
       className={`grid-container ${viewerState ? 'viewer-active' : ''}`}
       style={{
         backgroundColor: viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor,
-        // CSS variable pour les composants enfants (Menu mobile)
-        '--background-color': viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor
+        // CSS variables pour les composants enfants (Menu mobile, ViewerUI mobile)
+        '--background-color': viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor,
+        '--text-color': getTextColor(viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor)
       } as React.CSSProperties}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

@@ -160,8 +160,8 @@
     left: 0;
     width: 100vw;
     height: calc(var(--vh, 1vh) * 100);
-    background: transparent;
-    mix-blend-mode: difference;
+    background: var(--background-color, #403F3F);
+    mix-blend-mode: normal;
     pointer-events: auto;
     overflow: hidden;
   }
@@ -172,7 +172,7 @@
     top: 0;
     left: 0;
     right: 0;
-    background: transparent;
+    background: var(--background-color, #403F3F);
     z-index: 10;
     padding: var(--margin-mobile);
     padding-bottom: 1em;
@@ -188,7 +188,7 @@
     font-family: inherit;
     font-size: var(--font-size-mobile);
     font-weight: var(--font-weight-light);
-    color: white;
+    color: var(--text-color, #fff);
     text-align: left;
   }
 
@@ -207,7 +207,7 @@
     font-family: inherit;
     font-size: var(--font-size-mobile);
     font-weight: var(--font-weight-light);
-    color: white;
+    color: var(--text-color, #fff);
     text-align: left;
   }
 
@@ -233,7 +233,7 @@
     font-size: 18px;
     font-weight: var(--font-weight-medium);
     line-height: 1.4;
-    color: white;
+    color: var(--text-color, #fff);
     margin-bottom: 2em;
     padding-left: var(--margin-mobile);
     padding-right: var(--margin-mobile);
@@ -311,7 +311,7 @@
     font-family: inherit;
     font-size: var(--font-size-mobile);
     font-weight: var(--font-weight-light);
-    color: white;
+    color: var(--text-color, #fff);
     text-align: center;
   }
 }
