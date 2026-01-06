@@ -1,0 +1,97 @@
+/* GRID.CSS - Styles pour la grille d'images */
+
+.grid-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: #403F3F;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color 850ms ease 200ms;
+}
+
+.grid-container.viewer-active {
+  transition: background-color 600ms ease;
+}
+
+.grid-container:active {
+  cursor: grabbing;
+}
+
+.grid-container::-webkit-scrollbar {
+  display: none;
+}
+
+.grid-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.grid-item {
+  will-change: transform;
+}
+
+.grid-item .image-wrapper {
+  overflow: hidden;
+}
+
+.grid-item img {
+  display: block;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: auto;
+}
+
+.image-info {
+  padding: 8px 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.grid-item:hover .image-info {
+  opacity: 1;
+}
+
+.image-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.image-info .image-position {
+  color: #666;
+}
+
+.grid-loading,
+.grid-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  color: #666;
+}
+
+.grid-error {
+  color: #c00;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-container {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}

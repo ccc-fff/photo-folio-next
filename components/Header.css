@@ -1,0 +1,67 @@
+/* Header - Page principale */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: var(--margin-desktop);
+  z-index: 100;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.header-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--gap-desktop);
+}
+
+.header-menu {
+  grid-column: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  font-size: var(--font-size-desktop);
+  font-weight: var(--font-weight-light);
+  color: white;
+  text-align: left;
+  transition: font-weight 150ms ease;
+}
+
+.header-menu:hover {
+  font-weight: var(--font-weight-medium);
+}
+
+.header-series {
+  grid-column: 3;
+  font-size: var(--font-size-desktop);
+  font-weight: var(--font-weight-light);
+  color: white;
+  white-space: nowrap;
+}
+
+.header-series-position {
+  opacity: 0.6;
+}
+
+@media (max-width: 1024px) {
+  .header {
+    padding: var(--margin-mobile);
+    position: absolute;
+  }
+
+  .header-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .header-menu,
+  .header-series {
+    font-size: var(--font-size-mobile);
+  }
+}
