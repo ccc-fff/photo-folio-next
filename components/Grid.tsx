@@ -312,8 +312,10 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
       ref={setRefs}
       className={`grid-container ${viewerState ? 'viewer-active' : ''}`}
       style={{
-        backgroundColor: viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor
-      }}
+        backgroundColor: viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor,
+        // CSS variable pour les composants enfants (Menu mobile)
+        '--background-color': viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor
+      } as React.CSSProperties}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
