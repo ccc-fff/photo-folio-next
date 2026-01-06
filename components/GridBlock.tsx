@@ -120,7 +120,10 @@ export default function GridBlock({
           // LQIP comme background (visible pendant chargement)
           backgroundImage: `url(${image.lqip})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
+          // Opacité sur le wrapper entier (inclut le LQIP)
+          opacity: highlightOpacity,
+          transition: `opacity ${highlightTransitionDuration}ms ease`
         }}
       >
         <img
@@ -144,9 +147,7 @@ export default function GridBlock({
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
-            opacity: highlightOpacity,
-            transition: `opacity ${highlightTransitionDuration}ms ease`
+            objectFit: 'contain'
           }}
         />
       </div>

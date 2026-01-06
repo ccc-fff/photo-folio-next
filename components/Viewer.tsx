@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './Viewer.css'
 
 interface ViewerImage {
@@ -128,6 +128,9 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
 
+  // Track quelle image est chargée (par ID pour éviter les race conditions)
+  const [loadedImageId, setLoadedImageId] = useState<string | null>(null)
+
   const { getOptimalUrl } = useImagePreloader(images, currentIndex)
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -163,13 +166,15 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
 
   const currentImage = images[currentIndex]
 
-  const baseOpacity = imgAnim.state === 'visible' ? 1 : 0
+  // Opacité = 1 seulement si le séquenceur dit "visible" ET l'image actuelle est chargée
+  const isCurrentImageLoaded = loadedImageId === currentImage?.id
+  const baseOpacity = (imgAnim.state === 'visible' && isCurrentImageLoaded) ? 1 : 0
   const finalOpacity = blurAnim.state === 'active' ? 0.2 : baseOpacity
 
   const imgStyle = {
     opacity: finalOpacity,
     filter: blurAnim.state === 'active' ? 'blur(40px)' : 'blur(0px)',
-    transition: `opacity ${blurAnim.duration}ms ${blurAnim.ease}, filter ${blurAnim.duration}ms ${blurAnim.ease}`
+    transition: `opacity ${imgAnim.duration}ms ${imgAnim.ease}, filter ${blurAnim.duration}ms ${blurAnim.ease}`
   }
 
   return (
@@ -186,6 +191,7 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
           alt={currentImage?.alt || currentImage?.seriesTitle || ''}
           className="viewer-image"
           fetchPriority="high"
+          onLoad={() => setLoadedImageId(currentImage?.id)}
         />
       </div>
     </div>
