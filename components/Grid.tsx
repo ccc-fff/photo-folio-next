@@ -48,6 +48,17 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     }
   }, [])
 
+  // Fix hauteur mobile (100vh inclut la barre d'URL sur iOS/Android)
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01
+      document.documentElement.style.setProperty('--vh', `${vh}px`)
+    }
+    setVh()
+    window.addEventListener('resize', setVh)
+    return () => window.removeEventListener('resize', setVh)
+  }, [])
+
   const gridConfig = useMemo(() => {
     if (images.length === 0) {
       return { grid: [[]], GRID_WIDTH: 1, GRID_HEIGHT: 1, GALLERY_GRID: 1, placedImages: [] }
