@@ -10,5 +10,27 @@ import Grid from '@/components/Grid'
 export default async function Home() {
   const { series, images, about } = await getSiteData()
 
-  return <Grid series={series} images={images} about={about} />
+  // Preload des premières images pour améliorer le LCP
+  // Le navigateur commence à télécharger ces images en parallèle du JS
+  const preloadImages = images.slice(0, 4).map(img => {
+    // Extraire l'URL 400w du srcSet (taille mobile)
+    const url400 = img.srcSet.split(', ').find(s => s.includes('400w'))?.split(' ')[0]
+    return url400 || img.url
+  })
+
+  return (
+    <>
+      {/* Preload LCP images - téléchargées en parallèle du JS */}
+      {preloadImages.map((url, i) => (
+        <link
+          key={i}
+          rel="preload"
+          as="image"
+          href={url}
+          fetchPriority={i === 0 ? "high" : "auto"}
+        />
+      ))}
+      <Grid series={series} images={images} about={about} />
+    </>
+  )
 }
