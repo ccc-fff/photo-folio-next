@@ -107,6 +107,13 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config) {
     isMobile.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0
   }, [])
 
+  // Cleanup scales map on unmount (memory leak fix)
+  useEffect(() => {
+    return () => {
+      currentScalesRef.current.clear()
+    }
+  }, [])
+
   useEffect(() => {
     motionModeRef.current = motionMode
     if (motionMode === 'paused' || motionMode === 'scroll-only') {
@@ -258,7 +265,7 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config) {
       }
     })
 
-    if (currentScalesRef.current.size > allBlocks.length * 1.5) {
+    if (currentScalesRef.current.size > allBlocks.length * 1.1) {
       const currentKeys = new Set(allBlocks.map(b => b.key))
       for (const key of currentScalesRef.current.keys()) {
         if (!currentKeys.has(key)) {

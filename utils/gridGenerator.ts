@@ -105,6 +105,12 @@ function applyMaleFemaleConstraint(forbidden: Set<string>, x: number, y: number,
       if (cy === H - 1) forbidden.add(cellKey(cx, 0))
       if (cx === 0) forbidden.add(cellKey(L - 1, cy))
       if (cx === L - 1) forbidden.add(cellKey(0, cy))
+
+      // Contraintes coins diagonaux (fix overlap tiling)
+      if (cx === L - 1 && cy === H - 1) forbidden.add(cellKey(0, 0))
+      if (cx === 0 && cy === H - 1) forbidden.add(cellKey(L - 1, 0))
+      if (cx === L - 1 && cy === 0) forbidden.add(cellKey(0, H - 1))
+      if (cx === 0 && cy === 0) forbidden.add(cellKey(L - 1, H - 1))
     }
   }
 }

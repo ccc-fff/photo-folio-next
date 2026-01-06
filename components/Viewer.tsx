@@ -106,6 +106,8 @@ function useImagePreloader(images: ViewerImage[], currentIndex: number) {
         }
         idleCallbackRef.current = null
       }
+      // Clear preloaded images to free memory (memory leak fix)
+      preloadedRef.current.clear()
     }
   }, [images, currentIndex, getOptimalUrl, optimalWidth])
 
