@@ -3,7 +3,26 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Frédéric Fornini — Photographe",
-  description: "Portfolio de Frédéric Fornini, photographe basé à Paris",
+  description: "Portfolio de Frédéric Fornini, photographe. Séries photographiques, projets artistiques et travaux personnels.",
+  authors: [{ name: "Frédéric Fornini" }],
+  metadataBase: new URL("https://fredericfornini.com"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    title: "Frédéric Fornini — Photographe",
+    description: "Portfolio de Frédéric Fornini, photographe. Séries photographiques, projets artistiques et travaux personnels.",
+    url: "https://fredericfornini.com",
+    siteName: "Frédéric Fornini",
+    locale: "fr_FR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Frédéric Fornini — Photographe",
+    description: "Portfolio de Frédéric Fornini, photographe.",
+    creator: "@fredericfornini",
+  },
 };
 
 export default function RootLayout({
