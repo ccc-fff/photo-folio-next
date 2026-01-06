@@ -160,6 +160,7 @@
     left: 0;
     width: 100vw;
     height: calc(var(--vh, 1vh) * 100);
+    height: 100dvh;
     background: var(--background-color, #403F3F);
     mix-blend-mode: normal;
     pointer-events: auto;

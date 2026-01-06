@@ -33,6 +33,7 @@
 @media (max-width: 768px) {
   .viewer-overlay {
     height: calc(var(--vh, 1vh) * 100);
+    height: 100dvh;
   }
 
   .viewer-image-container {
@@ -42,6 +43,7 @@
     right: 0;
     bottom: 0;
     height: calc(var(--vh, 1vh) * 100 - 80px);
+    height: calc(100dvh - 80px);
     display: flex;
     align-items: flex-end;
     justify-content: center;

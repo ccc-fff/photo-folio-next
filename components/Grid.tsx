@@ -60,6 +60,7 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     return () => window.removeEventListener('resize', setVh)
   }, [])
 
+
   const gridConfig = useMemo(() => {
     if (images.length === 0) {
       return { grid: [[]], GRID_WIDTH: 1, GRID_HEIGHT: 1, GALLERY_GRID: 1, placedImages: [] }

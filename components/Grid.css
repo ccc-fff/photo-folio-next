@@ -92,6 +92,9 @@
 
 @media (max-width: 768px) {
   .grid-container {
+    /* Fallback pour navigateurs plus anciens */
     height: calc(var(--vh, 1vh) * 100);
+    /* dvh = dynamic viewport height, s'adapte quand la barre URL apparaît/disparaît */
+    height: 100dvh;
   }
 }
