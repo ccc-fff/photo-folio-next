@@ -1,7 +1,11 @@
 'use client'
 
 import { MOTION_CONFIG } from '@/config/motion'
+import { useI18n } from '@/lib/i18n'
 import type { GridImage } from '@/lib/data'
+
+// Type pour titre localisé
+type LocalizedString = { fr: string; en: string } | string
 
 interface Block {
   image: GridImage
@@ -43,6 +47,14 @@ export default function GridBlock({
   isInitiallyVisible = false
 }: GridBlockProps) {
   const { image, renderX, renderY, zoneWidth, zoneHeight, isHidden } = block
+  const { t } = useI18n()
+
+  // Helper pour extraire un titre localisé
+  const getTitle = (title: LocalizedString | undefined): string => {
+    if (!title) return ''
+    if (typeof title === 'string') return title
+    return t(title) || title.fr || ''
+  }
 
   const scale = image.scale || 0.80
   const availableWidth = zoneWidth * scale
@@ -69,7 +81,7 @@ export default function GridBlock({
 
   const offsetX = (zoneWidth - imageWidth) / 2
   const offsetY = (zoneHeight - imageHeight) / 2
-  const seriesTitle = image.seriesTitle || ''
+  const seriesTitle = getTitle(image.seriesTitle)
 
   let highlightOpacity = 1
   if (menuOpen) {

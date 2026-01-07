@@ -6,6 +6,7 @@ import { useGridVirtualization } from '@/hooks/useGridVirtualization'
 import { useDrag } from '@/hooks/useDrag'
 import { useSequencer, INITIAL_STATE } from '@/hooks/useSequencer'
 import { urlFor } from '@/lib/sanity'
+import { useI18n } from '@/lib/i18n'
 import { filterTrulyVisibleBlocks, getBlockRanksByDistance, getBlockCenter, getDistance } from '@/hooks/useProximity'
 import { MOTION_CONFIG } from '@/config/motion'
 import { getTextColor } from '@/utils/colorUtils'
@@ -17,6 +18,9 @@ import Menu from './Menu'
 import './Grid.css'
 import type { Series, GridImage, About } from '@/lib/data'
 
+// Type pour titre localisé
+type LocalizedString = { fr: string; en: string } | string
+
 interface GridProps {
   series: Series[]
   images: GridImage[]
@@ -26,6 +30,14 @@ interface GridProps {
 
 export default function Grid({ series, images, about, defaultBackgroundColor = '#403F3F' }: GridProps) {
   const { state, play, set } = useSequencer(INITIAL_STATE)
+  const { t } = useI18n()
+
+  // Helper pour extraire un titre localisé
+  const getTitle = (title: LocalizedString | undefined): string => {
+    if (!title) return ''
+    if (typeof title === 'string') return title
+    return t(title) || title.fr || ''
+  }
 
   const [hoveredImage, setHoveredImage] = useState<{
     seriesTitle: string
@@ -119,8 +131,8 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
       id: img._key,
       url: viewerImgBuilder(img.asset, 1800).url(),
       srcSet: `${viewerImgBuilder(img.asset, 1200).url()} 1200w, ${viewerImgBuilder(img.asset, 1800).url()} 1800w, ${viewerImgBuilder(img.asset, 2400).url()} 2400w`,
-      alt: img.alt || fullSeries.title,
-      seriesTitle: fullSeries.title,
+      alt: img.alt || getTitle(fullSeries.title),
+      seriesTitle: fullSeries.title,  // Passer l'objet localisé entier
       indexInSeries: i,
       totalInSeries: fullSeries.images.length
     }))
@@ -267,7 +279,7 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     if (activeBlock) {
       const { image } = activeBlock
       setHoveredImage({
-        seriesTitle: image.seriesTitle || '',
+        seriesTitle: getTitle(image.seriesTitle),
         indexInSeries: image.indexInSeries,
         totalInSeries: image.totalInSeries
       })
@@ -286,7 +298,7 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     if (activeBlock) {
       const { image } = activeBlock
       setHoveredImage({
-        seriesTitle: image.seriesTitle || '',
+        seriesTitle: getTitle(image.seriesTitle),
         indexInSeries: image.indexInSeries,
         totalInSeries: image.totalInSeries
       })
@@ -312,12 +324,22 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     )
   }
 
+  // Type pour Portable Text
+  type PortableTextBlock = {
+    _type: string
+    _key: string
+    children?: { _type: string; text: string; marks?: string[] }[]
+    markDefs?: { _type: string; _key: string; href?: string }[]
+    style?: string
+  }
+  type LocalizedRichText = { fr: PortableTextBlock[]; en: PortableTextBlock[] } | PortableTextBlock[] | string
+
   const viewerState = state.viewer as {
     seriesId: string
-    seriesImages: Array<{ id: string; url: string; srcSet: string; alt: string; seriesTitle: string }>
+    seriesImages: Array<{ id: string; url: string; srcSet: string; alt: string; seriesTitle: LocalizedString }>
     currentIndex: number
     backgroundColor: string | null
-    description: string | null
+    description: LocalizedRichText | null
   } | null
 
   return (
@@ -440,8 +462,8 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
               id: img._key,
               url: menuImgBuilder(img.asset, 1800).url(),
               srcSet: `${menuImgBuilder(img.asset, 1200).url()} 1200w, ${menuImgBuilder(img.asset, 1800).url()} 1800w, ${menuImgBuilder(img.asset, 2400).url()} 2400w`,
-              alt: img.alt || fullSeries.title,
-              seriesTitle: fullSeries.title,
+              alt: img.alt || getTitle(fullSeries.title),
+              seriesTitle: fullSeries.title,  // Passer l'objet localisé entier
               indexInSeries: i,
               totalInSeries: fullSeries.images.length
             }))

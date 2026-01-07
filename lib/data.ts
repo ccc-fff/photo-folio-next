@@ -7,6 +7,20 @@
 import { client, urlFor } from './sanity'
 import { SERIES_QUERY, ABOUT_QUERY } from './queries'
 
+// Types pour champs localisés (fr/en)
+type LocalizedString = { fr: string; en: string } | string
+type LocalizedText = { fr: string; en: string } | string
+
+// Type pour Portable Text (rich text)
+type PortableTextBlock = {
+  _type: string
+  _key: string
+  children?: { _type: string; text: string; marks?: string[] }[]
+  markDefs?: { _type: string; _key: string; href?: string }[]
+  style?: string
+}
+type LocalizedRichText = { fr: PortableTextBlock[]; en: PortableTextBlock[] } | PortableTextBlock[] | string
+
 // Types pour TypeScript
 export interface GridImage {
   id: string
@@ -17,7 +31,7 @@ export interface GridImage {
   alt: string
   seriesId: string
   seriesSlug: string
-  seriesTitle: string
+  seriesTitle: LocalizedString
   indexInSeries: number
   totalInSeries: number
   originalWidth: number
@@ -29,13 +43,13 @@ export interface GridImage {
 
 export interface Series {
   _id: string
-  title: string
+  title: LocalizedString
   slug: string
   order: number
   gridCount: number
-  description: string
-  shortDescription: string
-  client: string
+  description: LocalizedRichText
+  shortDescription: LocalizedString
+  client: LocalizedString
   backgroundColor: string
   images: Array<{
     _key: string
@@ -47,10 +61,10 @@ export interface Series {
 }
 
 export interface About {
-  bio: string
+  bio: LocalizedRichText
   contacts: Array<{
     _key: string
-    label: string
+    label: LocalizedString
     value: string
     type: string
   }>
@@ -82,6 +96,9 @@ export async function getSiteData() {
         // LQIP: image minuscule floutée (~500 bytes) pour placeholder
         const lqipBuilder = urlFor(img.asset).width(20).blur(50).quality(20).auto('format')
 
+        // Extraire le titre (string ou localisé)
+        const titleStr = typeof serie.title === 'string' ? serie.title : serie.title?.fr || ''
+
         images.push({
           id: img._key,
           url: imgBuilder(800).url(),
@@ -89,10 +106,10 @@ export async function getSiteData() {
           srcSet: `${imgBuilder(400).url()} 400w, ${imgBuilder(800).url()} 800w, ${imgBuilder(1200).url()} 1200w`,
           urlLarge: imgBuilder(1600).url(),
           lqip: lqipBuilder.url(),
-          alt: img.alt || serie.title,
+          alt: img.alt || titleStr,
           seriesId: serie._id,
           seriesSlug: serie.slug,
-          seriesTitle: serie.title,
+          seriesTitle: serie.title,  // Passer l'objet localisé entier
           indexInSeries: i,
           totalInSeries: serie.images.length,
           originalWidth: img.width,

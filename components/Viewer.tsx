@@ -1,14 +1,18 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useI18n } from '@/lib/i18n'
 import './Viewer.css'
+
+// Type pour titre localisé
+type LocalizedString = { fr: string; en: string } | string
 
 interface ViewerImage {
   id: string
   url: string
   srcSet?: string
   alt?: string
-  seriesTitle?: string
+  seriesTitle?: LocalizedString
 }
 
 interface AnimState {
@@ -125,10 +129,18 @@ const getAnimProps = (element: AnimState | string | undefined, defaultDuration =
 }
 
 export default function Viewer({ images, currentIndex, onNext, onPrev, elementStates = {} }: ViewerProps) {
+  const { t } = useI18n()
   const imgAnim = getAnimProps(elementStates.image, 500, 'ease-out')
   const blurAnim = getAnimProps(elementStates.blur, 200, 'ease-out')
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
+
+  // Helper pour extraire un titre localisé
+  const getTitle = (title: LocalizedString | undefined): string => {
+    if (!title) return ''
+    if (typeof title === 'string') return title
+    return t(title) || title.fr || ''
+  }
 
   // Track quelle image est chargée (par ID pour éviter les race conditions)
   const [loadedImageId, setLoadedImageId] = useState<string | null>(null)
@@ -190,7 +202,7 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
       >
         <img
           src={getOptimalUrl(currentImage)}
-          alt={currentImage?.alt || currentImage?.seriesTitle || ''}
+          alt={currentImage?.alt || getTitle(currentImage?.seriesTitle) || ''}
           className="viewer-image"
           fetchPriority="high"
           onLoad={() => setLoadedImageId(currentImage?.id)}

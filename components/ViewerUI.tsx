@@ -1,11 +1,21 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { PortableText } from '@portabletext/react'
+import { useI18n, LocalizedField } from '@/lib/i18n'
 import './ViewerUI.css'
+
+// Type pour Portable Text block
+type PortableTextBlock = {
+  _type: string
+  _key: string
+  children?: { _type: string; text: string }[]
+  [key: string]: unknown
+}
 
 interface ViewerImage {
   id: string
-  seriesTitle?: string
+  seriesTitle?: string | { fr: string; en: string }
 }
 
 interface AnimState {
@@ -14,10 +24,13 @@ interface AnimState {
   ease: string
 }
 
+// Description peut être: string, PortableText[], ou localisé { fr: ..., en: ... }
+type DescriptionType = string | PortableTextBlock[] | LocalizedField<string | PortableTextBlock[]> | null
+
 interface ViewerUIProps {
   images: ViewerImage[]
   currentIndex: number
-  description: string | null
+  description: DescriptionType
   onClose: () => void
   onNext: () => void
   onPrev: () => void
@@ -25,6 +38,18 @@ interface ViewerUIProps {
   elementStates?: {
     ui?: AnimState | string
     infos?: AnimState | string
+  }
+}
+
+// Composants pour le rich text
+const richTextComponents = {
+  marks: {
+    medium: ({ children }: { children: React.ReactNode }) => (
+      <span style={{ fontWeight: 500 }}>{children}</span>
+    ),
+    link: ({ value, children }: { value?: { href?: string }; children: React.ReactNode }) => (
+      <a href={value?.href || '#'} target="_blank" rel="noopener noreferrer">{children}</a>
+    )
   }
 }
 
@@ -48,11 +73,59 @@ export default function ViewerUI({
   onToggleInfos,
   elementStates = {}
 }: ViewerUIProps) {
+  const { t } = useI18n()
   const uiAnim = getAnimProps(elementStates.ui, 200, 'ease-out')
   const infosAnim = getAnimProps(elementStates.infos, 200, 'ease-out')
   const showInfos = infosAnim.state === 'visible'
   const [cursorSide, setCursorSide] = useState<'left' | 'right' | null>(null)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
+
+  // Helper pour récupérer le titre de série localisé
+  const getSeriesTitle = (title: string | { fr: string; en: string } | undefined) => {
+    if (!title) return ''
+    if (typeof title === 'string') return title
+    return t(title) || title.fr || ''
+  }
+
+  // Helper pour rendre la description (string ou PortableText, localisé ou non)
+  const renderDescription = () => {
+    if (!description) return null
+
+    // Si c'est une string simple
+    if (typeof description === 'string') return description
+
+    // Si c'est un array (Portable Text non localisé)
+    if (Array.isArray(description)) {
+      return <PortableText value={description} components={richTextComponents} />
+    }
+
+    // Si c'est un objet localisé { fr: ..., en: ... }
+    if (description && typeof description === 'object' && ('fr' in description || 'en' in description)) {
+      const localized = t(description as LocalizedField<string | PortableTextBlock[]>)
+      if (!localized) return null
+
+      if (typeof localized === 'string') return localized
+      if (Array.isArray(localized)) {
+        return <PortableText value={localized} components={richTextComponents} />
+      }
+    }
+
+    return null
+  }
+
+  // Vérifier si on a une description à afficher
+  const hasDescription = (() => {
+    if (!description) return false
+    if (typeof description === 'string') return description.length > 0
+    if (Array.isArray(description)) return description.length > 0
+    if (typeof description === 'object' && ('fr' in description || 'en' in description)) {
+      const localized = t(description as LocalizedField<string | PortableTextBlock[]>)
+      if (!localized) return false
+      if (typeof localized === 'string') return localized.length > 0
+      if (Array.isArray(localized)) return localized.length > 0
+    }
+    return false
+  })()
 
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 })
 
@@ -149,7 +222,7 @@ export default function ViewerUI({
         >
           Home
         </button>
-        {description && (
+        {hasDescription && (
           <button
             className={`viewer-infos-mobile ${showInfos ? 'active' : ''}`}
             onClick={onToggleInfos}
@@ -160,7 +233,7 @@ export default function ViewerUI({
       </header>
 
       <div className="viewer-header-mobile-row2" style={uiStyle}>
-        <span className="viewer-series-mobile">{currentImage?.seriesTitle}</span>
+        <span className="viewer-series-mobile">{getSeriesTitle(currentImage?.seriesTitle)}</span>
         <span className="viewer-counter-mobile">
           {String(currentIndex + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
         </span>
@@ -168,11 +241,11 @@ export default function ViewerUI({
 
       <footer className="viewer-footer" style={uiStyle}>
         <div className="viewer-info">
-          <span className="viewer-series">{currentImage?.seriesTitle}</span>
+          <span className="viewer-series">{getSeriesTitle(currentImage?.seriesTitle)}</span>
           <span className="viewer-counter">
             {String(currentIndex + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
           </span>
-          {description && (
+          {hasDescription && (
             <button
               className={`viewer-infos-toggle ${showInfos ? 'active' : ''}`}
               onClick={onToggleInfos}
@@ -183,7 +256,7 @@ export default function ViewerUI({
         </div>
       </footer>
 
-      {description && (
+      {hasDescription && (
         <>
           <div
             className={`viewer-description-backdrop ${showInfos ? 'visible' : ''}`}
@@ -208,7 +281,7 @@ export default function ViewerUI({
                 aria-hidden="true"
               />
               <div className="viewer-description-text">
-                {description}
+                {renderDescription()}
               </div>
             </div>
           </div>

@@ -1,11 +1,34 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { PortableText } from '@portabletext/react'
 import { urlFor } from '@/lib/sanity'
+import { useI18n } from '@/lib/i18n'
 import type { Series, About } from '@/lib/data'
 import './Menu.css'
 
+// Type pour Portable Text block
+type PortableTextBlock = {
+  _type: string
+  _key: string
+  children?: { _type: string; text: string; marks?: string[] }[]
+  markDefs?: { _type: string; _key: string; href?: string }[]
+  style?: string
+}
+
 const HOVER_DELAY = 150
+
+// Composants pour le rich text
+const richTextComponents = {
+  marks: {
+    medium: ({ children }: { children: React.ReactNode }) => (
+      <span style={{ fontWeight: 500 }}>{children}</span>
+    ),
+    link: ({ value, children }: { value?: { href?: string }; children: React.ReactNode }) => (
+      <a href={value?.href || '#'} target="_blank" rel="noopener noreferrer">{children}</a>
+    )
+  }
+}
 
 interface MenuProps {
   series: Series[]
@@ -16,6 +39,7 @@ interface MenuProps {
 }
 
 export default function Menu({ series, about, onClose, onSeriesHover, onSeriesClick }: MenuProps) {
+  const { locale, setLocale, t } = useI18n()
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -60,6 +84,60 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
 
   const isAboutActive = hoveredItem === 'about'
 
+  // Récupérer le titre localisé d'une série
+  const getSeriesTitle = (s: Series) => {
+    if (typeof s.title === 'string') return s.title
+    return t(s.title) || s.title?.fr || ''
+  }
+
+  // Récupérer le label localisé d'un contact
+  const getContactLabel = (contact: About['contacts'][0]) => {
+    if (typeof contact.label === 'string') return contact.label
+    return t(contact.label) || contact.label?.fr || ''
+  }
+
+  // Récupérer la bio localisée (peut être string ou rich text)
+  const renderBio = () => {
+    if (!about?.bio) return 'Photographe basé à Paris.'
+
+    // Si c'est une string simple (ancien format)
+    if (typeof about.bio === 'string') return about.bio
+
+    // Si c'est un array direct (Portable Text non localisé)
+    if (Array.isArray(about.bio)) {
+      return <PortableText value={about.bio} components={richTextComponents} />
+    }
+
+    // Si c'est un objet localisé { fr: ..., en: ... }
+    if (about.bio && typeof about.bio === 'object' && 'fr' in about.bio) {
+      const localizedBio = t(about.bio as { fr: PortableTextBlock[]; en: PortableTextBlock[] })
+      if (Array.isArray(localizedBio)) {
+        return <PortableText value={localizedBio} components={richTextComponents} />
+      }
+    }
+
+    // Fallback
+    return 'Photographe basé à Paris.'
+  }
+
+  // Toggle langue
+  const LanguageToggle = () => (
+    <div className="language-toggle">
+      <button
+        className={`lang-btn ${locale === 'fr' ? 'active' : ''}`}
+        onClick={() => setLocale('fr')}
+      >
+        Fr
+      </button>
+      <button
+        className={`lang-btn ${locale === 'en' ? 'active' : ''}`}
+        onClick={() => setLocale('en')}
+      >
+        Eng
+      </button>
+    </div>
+  )
+
   return (
     <div className={`menu ${isAboutActive ? 'about-active' : ''}`}>
       {/* Header fixe sur mobile */}
@@ -73,7 +151,7 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
             onMouseEnter={handleAboutEnter}
             onMouseLeave={handleAboutLeave}
           >
-            Frederic Fornini
+            Frédéric Fornini
           </button>
           {about?.contacts?.map((contact, i) => (
             <a
@@ -83,9 +161,10 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               rel={contact.type === 'url' ? 'noopener noreferrer' : undefined}
               className="menu-nav-item"
             >
-              {contact.label}
+              {getContactLabel(contact)}
             </a>
           ))}
+          <LanguageToggle />
         </nav>
       </header>
 
@@ -98,7 +177,7 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
             className="touch-catcher"
             aria-hidden="true"
           />
-          <span>{about?.bio || 'Photographe base a Paris.'}</span>
+          <span>{renderBio()}</span>
         </div>
 
         <div className="menu-series-grid-mobile">
@@ -117,11 +196,11 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               {s.images?.[0] && (
                 <img
                   src={urlFor(s.images[0].asset).width(400).auto('format').url()}
-                  alt={s.title}
+                  alt={getSeriesTitle(s)}
                   className="series-thumb"
                 />
               )}
-              <span>{s.title}</span>
+              <span>{getSeriesTitle(s)}</span>
             </button>
           ))}
           {series?.length % 2 === 1 && (
@@ -149,7 +228,7 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
             onMouseEnter={handleAboutEnter}
             onMouseLeave={handleAboutLeave}
           >
-            Frederic Fornini
+            Frédéric Fornini
           </button>
           {about?.contacts?.map((contact, i) => (
             <a
@@ -159,9 +238,10 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               rel={contact.type === 'url' ? 'noopener noreferrer' : undefined}
               className="menu-nav-item"
             >
-              {contact.label}
+              {getContactLabel(contact)}
             </a>
           ))}
+          <LanguageToggle />
         </nav>
 
         <ul className="menu-series menu-series-list">
@@ -173,14 +253,14 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
                 onMouseLeave={handleSeriesLeave}
                 onClick={() => onSeriesClick?.(s._id)}
               >
-                {s.title}
+                {getSeriesTitle(s)}
               </button>
             </li>
           ))}
         </ul>
 
         <div className={`menu-about-text ${isAboutActive ? 'visible' : ''}`}>
-          {about?.bio || 'Photographe base a Paris.'}
+          {renderBio()}
         </div>
       </div>
     </div>
