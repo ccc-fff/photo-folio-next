@@ -14,10 +14,15 @@
 
 .grid-container.viewer-active {
   transition: background-color 600ms ease;
+  cursor: none;
 }
 
 .grid-container:active {
   cursor: grabbing;
+}
+
+.grid-container.viewer-active:active {
+  cursor: none;
 }
 
 .grid-container::-webkit-scrollbar {
