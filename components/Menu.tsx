@@ -120,23 +120,7 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
     return 'Photographe basé à Paris.'
   }
 
-  // Toggle langue
-  const LanguageToggle = () => (
-    <div className="language-toggle">
-      <button
-        className={`lang-btn ${locale === 'fr' ? 'active' : ''}`}
-        onClick={() => setLocale('fr')}
-      >
-        Fr
-      </button>
-      <button
-        className={`lang-btn ${locale === 'en' ? 'active' : ''}`}
-        onClick={() => setLocale('en')}
-      >
-        Eng
-      </button>
-    </div>
-  )
+  // Toggle langue - JSX inliné pour éviter le re-mount à chaque render
 
   return (
     <div className={`menu ${isAboutActive ? 'about-active' : ''}`}>
@@ -164,7 +148,20 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               {getContactLabel(contact)}
             </a>
           ))}
-          <LanguageToggle />
+          <div className="language-toggle">
+            <button
+              className={`lang-btn ${locale === 'fr' ? 'active' : ''}`}
+              onClick={() => setLocale('fr')}
+            >
+              Fr
+            </button>
+            <button
+              className={`lang-btn ${locale === 'en' ? 'active' : ''}`}
+              onClick={() => setLocale('en')}
+            >
+              Eng
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -241,7 +238,20 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               {getContactLabel(contact)}
             </a>
           ))}
-          <LanguageToggle />
+          <div className="language-toggle">
+            <button
+              className={`lang-btn ${locale === 'fr' ? 'active' : ''}`}
+              onClick={() => setLocale('fr')}
+            >
+              Fr
+            </button>
+            <button
+              className={`lang-btn ${locale === 'en' ? 'active' : ''}`}
+              onClick={() => setLocale('en')}
+            >
+              Eng
+            </button>
+          </div>
         </nav>
 
         <ul className="menu-series menu-series-list">
