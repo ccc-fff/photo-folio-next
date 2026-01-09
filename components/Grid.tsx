@@ -28,7 +28,7 @@ interface GridProps {
   defaultBackgroundColor?: string
 }
 
-export default function Grid({ series, images, about, defaultBackgroundColor = '#403F3F' }: GridProps) {
+export default function Grid({ series, images, about, defaultBackgroundColor = '#070707' }: GridProps) {
   const { state, play, set } = useSequencer(INITIAL_STATE)
   const { t } = useI18n()
 
@@ -50,6 +50,14 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
   const staggerRef = useRef<{ ranks: Map<string, number> | null; origin: { x: number; y: number } | null }>({ ranks: null, origin: null })
   const viewerTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isMountedRef = useRef(true)
+
+  // Propager la couleur de fond au document
+  const viewerBgColor = (state.viewer as { backgroundColor?: string | null } | null)?.backgroundColor
+  useEffect(() => {
+    const color = viewerBgColor || hoveredBgColor || defaultBackgroundColor
+    document.documentElement.style.setProperty('--background-color', color)
+    document.documentElement.style.backgroundColor = color
+  }, [viewerBgColor, hoveredBgColor, defaultBackgroundColor])
 
   useEffect(() => {
     isMountedRef.current = true

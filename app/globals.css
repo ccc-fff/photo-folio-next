@@ -9,7 +9,7 @@
   --font-size-mobile: 14px;
   --font-weight-light: 300;
   --font-weight-medium: 500;
-  --background: #403F3F;
+  --background: #070707;
   --foreground: #ffffff;
 }
 
@@ -34,5 +34,5 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
-  background-color: #403F3F;
+  background-color: var(--background-color, #070707);
 }

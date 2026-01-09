@@ -5,7 +5,7 @@
  * Les données sont intégrées dans le HTML généré
  */
 import { client, urlFor } from './sanity'
-import { SERIES_QUERY, ABOUT_QUERY } from './queries'
+import { SERIES_QUERY, ABOUT_QUERY, SITE_SETTINGS_QUERY } from './queries'
 
 // Types pour champs localisés (fr/en)
 type LocalizedString = { fr: string; en: string } | string
@@ -74,11 +74,16 @@ export interface About {
  * Récupère toutes les données nécessaires au site
  * Appelé une seule fois au build
  */
+export interface SiteSettings {
+  defaultBackgroundColor: string | null
+}
+
 export async function getSiteData() {
-  // Fetch séries et about en parallèle
-  const [series, about] = await Promise.all([
+  // Fetch séries, about et settings en parallèle
+  const [series, about, settings] = await Promise.all([
     client.fetch<Series[]>(SERIES_QUERY),
-    client.fetch<About>(ABOUT_QUERY)
+    client.fetch<About>(ABOUT_QUERY),
+    client.fetch<SiteSettings>(SITE_SETTINGS_QUERY)
   ])
 
   // Construire la liste d'images pour la grille
@@ -124,6 +129,7 @@ export async function getSiteData() {
   return {
     series,
     images,
-    about
+    about,
+    defaultBackgroundColor: settings?.defaultBackgroundColor || null
   }
 }

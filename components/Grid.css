@@ -2,14 +2,14 @@
 
 .grid-container {
   width: 100vw;
-  height: 100vh;
+  height: 100lvh;
   overflow: hidden;
   position: relative;
-  background: #403F3F;
+  background: var(--background-color, #070707);
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
-  transition: background-color 850ms ease 200ms;
+  transition: background-color 850ms ease;
 }
 
 .grid-container.viewer-active {

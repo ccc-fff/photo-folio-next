@@ -8,7 +8,7 @@ import { getSiteData } from '@/lib/data'
 import Grid from '@/components/Grid'
 
 export default async function Home() {
-  const { series, images, about } = await getSiteData()
+  const { series, images, about, defaultBackgroundColor } = await getSiteData()
 
   // Preload des premières images pour améliorer le LCP
   // Le navigateur commence à télécharger ces images en parallèle du JS
@@ -30,7 +30,7 @@ export default async function Home() {
           fetchPriority={i === 0 ? "high" : "auto"}
         />
       ))}
-      <Grid series={series} images={images} about={about} />
+      <Grid series={series} images={images} about={about} defaultBackgroundColor={defaultBackgroundColor || undefined} />
     </>
   )
 }

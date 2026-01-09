@@ -38,7 +38,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.sanity.io" />
         {/* Theme color pour Safari (mis à jour dynamiquement par Grid.tsx) */}
-        <meta name="theme-color" content="#403F3F" />
+        <meta name="theme-color" content="#070707" />
       </head>
       <body>
         <I18nProvider>

@@ -38,3 +38,10 @@ export const ABOUT_QUERY = `
     }
   }
 `
+
+// Récupère les paramètres du site
+export const SITE_SETTINGS_QUERY = `
+  *[_type == "siteSettings"][0] {
+    "defaultBackgroundColor": defaultBackgroundColor.hex
+  }
+`
