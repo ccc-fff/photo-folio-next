@@ -355,7 +355,6 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
       ref={setRefs}
       className={`grid-container ${viewerState ? 'viewer-active' : ''}`}
       style={{
-        backgroundColor: viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor,
         // CSS variables pour les composants enfants (Menu mobile, ViewerUI mobile)
         '--background-color': viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor,
         '--text-color': getTextColor(viewerState?.backgroundColor || hoveredBgColor || defaultBackgroundColor)

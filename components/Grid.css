@@ -5,11 +5,10 @@
   height: 100lvh;
   overflow: hidden;
   position: relative;
-  background: var(--background-color, #070707);
+  background: transparent;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
-  transition: background-color 850ms ease;
 }
 
 .grid-container.viewer-active {
