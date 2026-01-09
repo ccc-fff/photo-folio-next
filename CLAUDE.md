@@ -67,3 +67,18 @@ html                    → fond unique anime (transition 850ms)
 - **useSequencer** : gere les transitions comme des timelines
 - **useGridVirtualization** : affiche uniquement les images visibles
 - **Grid.tsx** : composant principal, orchestre tout
+
+---
+
+## Prochaines etapes (TODO)
+
+### SEO & Routing
+- [ ] Pages dediees par serie (`/series/[slug]`)
+- [ ] Meta tags dynamiques (titre, description, og:image par serie)
+- [ ] Sitemap.xml
+- [ ] robots.txt
+
+### Optionnel
+- [ ] Favicon
+- [ ] Page contact
+- [ ] Traductions anglais (fichier TRADUCTIONS_ANGLAIS.md existe)
