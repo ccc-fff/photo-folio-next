@@ -262,13 +262,15 @@
   .menu-content-mobile {
     display: block;
     position: absolute;
-    top: 0;
+    top: 180px;
     left: 0;
     right: 0;
     bottom: 0;
+    height: calc(var(--vh, 1vh) * 100 - 180px);
+    height: calc(100dvh - 180px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-top: 180px;
+    padding-top: 0;
     padding-bottom: 4em;
     z-index: 1;
   }
