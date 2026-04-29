@@ -12,9 +12,9 @@ import { filterTrulyVisibleBlocks, getBlockRanksByDistance, getBlockCenter, getD
 import { MOTION_CONFIG } from '@/config/motion'
 import { getTextColor } from '@/utils/colorUtils'
 import GridBlock from './GridBlock'
-import Viewer from './Viewer'
-import ViewerUI from './ViewerUI'
 import Header from './Header'
+const Viewer = dynamic(() => import('./Viewer'), { ssr: false })
+const ViewerUI = dynamic(() => import('./ViewerUI'), { ssr: false })
 const Menu = dynamic(() => import('./Menu'))
 import './Grid.css'
 import type { Series, GridImage, About } from '@/lib/data'
@@ -79,6 +79,25 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     setVh()
     window.addEventListener('resize', setVh)
     return () => window.removeEventListener('resize', setVh)
+  }, [])
+
+  // Précharge les chunks Viewer + ViewerUI en idle après chargement complet
+  // de la page, pour que le 1er clic image n'attende pas le download du chunk.
+  useEffect(() => {
+    const preload = () => {
+      const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback
+        ?? ((cb: () => void) => setTimeout(cb, 300))
+      idle(() => {
+        import('./Viewer')
+        import('./ViewerUI')
+      })
+    }
+    if (document.readyState === 'complete') {
+      preload()
+    } else {
+      window.addEventListener('load', preload, { once: true })
+      return () => window.removeEventListener('load', preload)
+    }
   }, [])
 
 
