@@ -229,8 +229,8 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
 
   const dragRef = useDrag({ onDrag: handleDrag })
 
-  const combinedRef = useRef<HTMLDivElement | null>(null)
-  const setRefs = (element: HTMLDivElement | null) => {
+  const combinedRef = useRef<HTMLElement | null>(null)
+  const setRefs = (element: HTMLElement | null) => {
     combinedRef.current = element
     virtualizationRef.current = element
     dragRef.current = element
@@ -326,9 +326,9 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
 
   if (!isReady || images.length === 0) {
     return (
-      <div ref={setRefs} className="grid-container">
+      <main ref={setRefs} className="grid-container">
         <div className="grid-loading">Chargement...</div>
-      </div>
+      </main>
     )
   }
 
@@ -351,7 +351,7 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
   } | null
 
   return (
-    <div
+    <main
       ref={setRefs}
       className={`grid-container ${viewerState ? 'viewer-active' : ''}`}
       style={{
@@ -506,6 +506,6 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
           }}
         />
       )}
-    </div>
+    </main>
   )
 }

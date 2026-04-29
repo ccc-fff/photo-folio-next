@@ -21,7 +21,7 @@ export function useDrag(options: UseDragOptions = {}) {
     velocityMax = MOTION_CONFIG.SOURCES.drag.maxVelocity
   } = options
 
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const containerRef = useRef<HTMLElement | null>(null)
   const isDragging = useRef(false)
   const startPos = useRef({ x: 0, y: 0 })
   const lastPos = useRef({ x: 0, y: 0 })

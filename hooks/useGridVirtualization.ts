@@ -44,7 +44,7 @@ interface VisibleBlock extends GridBlock {
 
 export function useGridVirtualization(gridConfig: GridConfig, config: Config) {
   const [visibleBlocks, setVisibleBlocks] = useState<VisibleBlock[]>([])
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const containerRef = useRef<HTMLElement | null>(null)
 
   const {
     GRID_WIDTH = 1,
