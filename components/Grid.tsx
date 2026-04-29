@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { generateGrid, GRID_CONFIG } from '@/utils/gridGenerator'
 import { useGridVirtualization } from '@/hooks/useGridVirtualization'
 import { useDrag } from '@/hooks/useDrag'
@@ -14,7 +15,7 @@ import GridBlock from './GridBlock'
 import Viewer from './Viewer'
 import ViewerUI from './ViewerUI'
 import Header from './Header'
-import Menu from './Menu'
+const Menu = dynamic(() => import('./Menu'))
 import './Grid.css'
 import type { Series, GridImage, About } from '@/lib/data'
 
