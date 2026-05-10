@@ -1,0 +1,41 @@
+import { urlFor } from './sanity'
+import type { Series } from './data'
+
+type LocalizedString = { fr: string; en: string } | string
+
+function defaultTitle(title: LocalizedString | undefined): string {
+  if (!title) return ''
+  if (typeof title === 'string') return title
+  return title.fr || title.en || ''
+}
+
+export function buildViewerData(
+  series: Series,
+  currentIndex: number = 0,
+  titleResolver?: (title: LocalizedString | undefined) => string
+) {
+  const resolveTitle = titleResolver || defaultTitle
+  const imgBuilder = (asset: unknown, w: number) => urlFor(asset).width(w).auto('format')
+
+  const seriesImages = series.images.map((img, i) => ({
+    id: img._key,
+    url: imgBuilder(img.asset, 1800).url(),
+    srcSet: `${imgBuilder(img.asset, 1200).url()} 1200w, ${imgBuilder(img.asset, 1800).url()} 1800w, ${imgBuilder(img.asset, 2400).url()} 2400w`,
+    alt: img.alt || resolveTitle(series.title),
+    seriesTitle: series.title,
+    indexInSeries: i,
+    totalInSeries: series.images.length
+  }))
+
+  const safeIndex = Math.max(0, Math.min(currentIndex, Math.max(0, seriesImages.length - 1)))
+
+  return {
+    seriesId: series._id,
+    seriesImages,
+    currentIndex: safeIndex,
+    backgroundColor: series.backgroundColor || null,
+    description: series.description || null
+  }
+}
+
+export type ViewerData = ReturnType<typeof buildViewerData>

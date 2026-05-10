@@ -23,6 +23,13 @@ export const SEQUENCES: Record<string, Sequence> = {
     { at: 'stagger-end+300', set: { viewerImage: { state: 'visible', duration: 500, ease: 'ease-out' } } },
     { at: 'stagger-end+500', set: { viewerUI: { state: 'visible', duration: 200, ease: 'ease-out' } } },
   ],
+  // Variante "cold start" : la grille n'a jamais été affichée (arrivée directe sur /[slug]).
+  // Saute la phase de fade-out staggered et joue uniquement l'apparition du viewer.
+  'open-viewer-direct': [
+    { at: 0, set: { header: false, grid: 'hidden', motion: 'paused', viewerBackground: { state: 'visible', duration: 300, ease: 'ease-out' } } },
+    { at: 300, set: { viewerImage: { state: 'visible', duration: 500, ease: 'ease-out' } } },
+    { at: 500, set: { viewerUI: { state: 'visible', duration: 200, ease: 'ease-out' } } },
+  ],
   'close-viewer': [
     { at: 0, set: { viewerUI: { state: 'hidden', duration: 200, ease: 'ease-in' }, viewerImage: { state: 'hidden', duration: 500, ease: 'ease-in' } } },
     { at: 300, set: { viewerBackground: { state: 'hidden', duration: 300, ease: 'ease-in' } } },

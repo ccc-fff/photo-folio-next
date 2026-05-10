@@ -5,12 +5,12 @@ import dynamic from 'next/dynamic'
 import { generateGrid, GRID_CONFIG } from '@/utils/gridGenerator'
 import { useGridVirtualization } from '@/hooks/useGridVirtualization'
 import { useDrag } from '@/hooks/useDrag'
-import { useSequencer, INITIAL_STATE } from '@/hooks/useSequencer'
-import { urlFor } from '@/lib/sanity'
+import { useSequencer, INITIAL_STATE, type SequencerState } from '@/hooks/useSequencer'
 import { useI18n } from '@/lib/i18n'
 import { filterTrulyVisibleBlocks, getBlockRanksByDistance, getBlockCenter, getDistance } from '@/hooks/useProximity'
 import { MOTION_CONFIG } from '@/config/motion'
 import { getTextColor } from '@/utils/colorUtils'
+import { buildViewerData, type ViewerData } from '@/lib/viewerData'
 import GridBlock from './GridBlock'
 import Header from './Header'
 const Viewer = dynamic(() => import('./Viewer'), { ssr: false })
@@ -27,10 +27,35 @@ interface GridProps {
   images: GridImage[]
   about: About | null
   defaultBackgroundColor?: string
+  initialOpenSlug?: string
+  initialOpenIndex?: number
+  initialViewerData?: ViewerData | null
 }
 
-export default function Grid({ series, images, about, defaultBackgroundColor = '#070707' }: GridProps) {
-  const { state, play, set } = useSequencer(INITIAL_STATE)
+export default function Grid({
+  series,
+  images,
+  about,
+  defaultBackgroundColor = '#070707',
+  initialOpenSlug,
+  initialViewerData
+}: GridProps) {
+  // État initial du sequencer : viewer ouvert d'emblée si arrivée directe sur /[slug]
+  const dynamicInitial = useMemo<SequencerState>(() => {
+    if (initialViewerData) {
+      return {
+        ...INITIAL_STATE,
+        grid: 'hidden',
+        motion: 'paused',
+        viewer: initialViewerData,
+      }
+    }
+    return INITIAL_STATE
+    // initialViewerData est figé au mount (vient du server component)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const { state, play, set } = useSequencer(dynamicInitial)
   const { t } = useI18n()
 
   // Helper pour extraire un titre localisé
@@ -145,6 +170,63 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     play('initial-load', { staggerDuration })
   }, [isReady, visibleBlocks, state.grid, play])
 
+  // Arrivée directe sur /[slug] : déclencher l'apparition du viewer (fade in)
+  // sans rejouer la séquence d'ouverture qui suppose une grille visible au départ.
+  const hasInitialDirectOpen = useRef(false)
+  useEffect(() => {
+    if (!initialViewerData || hasInitialDirectOpen.current) return
+    hasInitialDirectOpen.current = true
+    play('open-viewer-direct')
+  }, [initialViewerData, play])
+
+  // Bouton retour/avant du navigateur : aligner le viewer sur l'URL.
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname
+      const match = path.match(/^\/([^/]+?)(?:\/(\d+))?\/?$/)
+
+      if (path === '/' || !match) {
+        if (state.viewer) {
+          const mousePos = mousePositionRef.current
+          const origin = (mousePos && mousePos.x >= 0)
+            ? mousePos
+            : { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+          const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
+          const ranks = getBlockRanksByDistance(trulyVisible, origin)
+          staggerRef.current = { ranks, origin }
+          const maxRank = trulyVisible.length - 1
+          const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
+          play('close-viewer', { staggerDuration })
+        }
+        return
+      }
+
+      const [, slug, indexStr] = match
+      const targetSeries = series.find(s => s.slug === slug)
+      if (!targetSeries || !targetSeries.images) return
+
+      const idx = indexStr ? Math.max(0, parseInt(indexStr, 10) - 1) : 0
+      const newViewerData = buildViewerData(targetSeries, idx, getTitle)
+
+      if (state.viewer) {
+        set({ viewer: newViewerData })
+      } else {
+        set({
+          viewer: newViewerData,
+          grid: 'hidden',
+          motion: 'paused',
+          header: false,
+        })
+        play('open-viewer-direct')
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+    // getTitle est intentionnellement omis (closure stable, comportement préservé avec l'existant)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.viewer, series, visibleBlocks, play, set])
+
   const handleImageClick = useCallback((imageId: string, clickPosition: { x: number; y: number }) => {
     if (state.grid === 'fading-out' || state.grid === 'fading-in') return
 
@@ -154,35 +236,23 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     const fullSeries = series.find(s => s._id === clickedImage.seriesId)
     if (!fullSeries || !fullSeries.images) return
 
-    const viewerImgBuilder = (asset: unknown, w: number) => urlFor(asset).width(w).auto('format')
-    const seriesImages = fullSeries.images.map((img, i) => ({
-      id: img._key,
-      url: viewerImgBuilder(img.asset, 1800).url(),
-      srcSet: `${viewerImgBuilder(img.asset, 1200).url()} 1200w, ${viewerImgBuilder(img.asset, 1800).url()} 1800w, ${viewerImgBuilder(img.asset, 2400).url()} 2400w`,
-      alt: img.alt || getTitle(fullSeries.title),
-      seriesTitle: fullSeries.title,  // Passer l'objet localisé entier
-      indexInSeries: i,
-      totalInSeries: fullSeries.images.length
-    }))
-
-    const initialIndex = seriesImages.findIndex(img => img.id === imageId)
+    const viewerData = buildViewerData(fullSeries, clickedImage.indexInSeries, getTitle)
 
     const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
     const ranks = getBlockRanksByDistance(trulyVisible, clickPosition)
     staggerRef.current = { ranks, origin: clickPosition }
 
-    const viewerData = {
-      seriesId: fullSeries._id,
-      seriesImages,
-      currentIndex: initialIndex >= 0 ? initialIndex : 0,
-      backgroundColor: fullSeries.backgroundColor || null,
-      description: fullSeries.description || null
-    }
-
     const maxRank = trulyVisible.length - 1
     const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
 
     play('open-viewer', { staggerDuration, data: { viewer: viewerData } })
+
+    if (fullSeries.slug) {
+      const url = clickedImage.indexInSeries > 0
+        ? `/${fullSeries.slug}/${clickedImage.indexInSeries + 1}`
+        : `/${fullSeries.slug}`
+      window.history.pushState({}, '', url)
+    }
   }, [images, series, state.grid, visibleBlocks, play])
 
   const handleCloseViewer = useCallback(() => {
@@ -199,6 +269,10 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
     const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
 
     play('close-viewer', { staggerDuration })
+
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/')
+    }
   }, [visibleBlocks, play])
 
   const handleViewerNext = useCallback(() => {
@@ -484,16 +558,7 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
               return
             }
 
-            const menuImgBuilder = (asset: unknown, w: number) => urlFor(asset).width(w).auto('format')
-            const seriesImages = fullSeries.images.map((img, i) => ({
-              id: img._key,
-              url: menuImgBuilder(img.asset, 1800).url(),
-              srcSet: `${menuImgBuilder(img.asset, 1200).url()} 1200w, ${menuImgBuilder(img.asset, 1800).url()} 1800w, ${menuImgBuilder(img.asset, 2400).url()} 2400w`,
-              alt: img.alt || getTitle(fullSeries.title),
-              seriesTitle: fullSeries.title,  // Passer l'objet localisé entier
-              indexInSeries: i,
-              totalInSeries: fullSeries.images.length
-            }))
+            const viewerData = buildViewerData(fullSeries, 0, getTitle)
 
             scrollToSeries(null)
 
@@ -502,15 +567,13 @@ export default function Grid({ series, images, about, defaultBackgroundColor = '
               highlightedSeriesId: null,
               grid: 'hidden',
               motion: 'paused',
-              viewer: {
-                seriesId: fullSeries._id,
-                seriesImages,
-                currentIndex: 0,
-                backgroundColor: fullSeries.backgroundColor || null,
-                description: fullSeries.description || null
-              },
+              viewer: viewerData,
               viewerBackground: { state: 'visible', duration: 300, ease: 'ease-out' },
             })
+
+            if (fullSeries.slug) {
+              window.history.pushState({}, '', `/${fullSeries.slug}`)
+            }
 
             if (viewerTimeoutRef.current) {
               clearTimeout(viewerTimeoutRef.current)
