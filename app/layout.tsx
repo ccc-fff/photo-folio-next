@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Frédéric Fornini — Photographe",
-  description: "Portfolio de Frédéric Fornini, photographe. Séries photographiques, projets artistiques et travaux personnels.",
+  description: "Photographier est une invitation à se questionner sur là où notre regard se pose et à partager l'émerveillement d'un monde qui ne va pas de soi.",
   authors: [{ name: "Frédéric Fornini" }],
   metadataBase: new URL("https://fredericfornini.com"),
   alternates: {
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     title: "Frédéric Fornini — Photographe",
-    description: "Portfolio de Frédéric Fornini, photographe. Séries photographiques, projets artistiques et travaux personnels.",
+    description: "Photographier est une invitation à se questionner sur là où notre regard se pose et à partager l'émerveillement d'un monde qui ne va pas de soi.",
     url: "https://fredericfornini.com",
     siteName: "Frédéric Fornini",
     locale: "fr_FR",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Frédéric Fornini — Photographe",
-    description: "Portfolio de Frédéric Fornini, photographe.",
+    description: "Photographier est une invitation à se questionner sur là où notre regard se pose et à partager l'émerveillement d'un monde qui ne va pas de soi.",
     creator: "@fredericfornini",
   },
 };
