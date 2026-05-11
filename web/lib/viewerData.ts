@@ -34,7 +34,8 @@ export function buildViewerData(
     seriesImages,
     currentIndex: safeIndex,
     backgroundColor: series.backgroundColor || null,
-    description: series.description || null
+    description: series.description || null,
+    credits: series.credits || null
   }
 }
 

@@ -442,6 +442,7 @@ export default function Grid({
     currentIndex: number
     backgroundColor: string | null
     description: LocalizedRichText | null
+    credits: Array<{ role: string; name: string; url?: string }> | null
   } | null
 
   return (
@@ -517,6 +518,7 @@ export default function Grid({
           images={viewerState.seriesImages}
           currentIndex={viewerState.currentIndex}
           description={viewerState.description}
+          credits={viewerState.credits}
           onClose={handleCloseViewer}
           onNext={handleViewerNext}
           onPrev={handleViewerPrev}

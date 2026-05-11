@@ -41,6 +41,12 @@ export interface GridImage {
   scale?: number
 }
 
+export interface Credit {
+  role: string
+  name: string
+  url?: string
+}
+
 export interface Series {
   _id: string
   title: LocalizedString
@@ -51,6 +57,7 @@ export interface Series {
   shortDescription: LocalizedString
   client: LocalizedString
   backgroundColor: string
+  credits?: Credit[]
   images: Array<{
     _key: string
     alt: string

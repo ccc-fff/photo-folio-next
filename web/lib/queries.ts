@@ -16,6 +16,11 @@ export const SERIES_QUERY = `
     shortDescription,
     client,
     "backgroundColor": backgroundColor.hex,
+    credits[] {
+      role,
+      name,
+      url
+    },
     images[] {
       _key,
       alt,

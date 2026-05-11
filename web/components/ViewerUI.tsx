@@ -24,6 +24,12 @@ interface AnimState {
   ease: string
 }
 
+interface Credit {
+  role: string
+  name: string
+  url?: string
+}
+
 // Description peut être: string, PortableText[], ou localisé { fr: ..., en: ... }
 type DescriptionType = string | PortableTextBlock[] | LocalizedField<string | PortableTextBlock[]> | null
 
@@ -31,6 +37,7 @@ interface ViewerUIProps {
   images: ViewerImage[]
   currentIndex: number
   description: DescriptionType
+  credits?: Credit[] | null
   onClose: () => void
   onNext: () => void
   onPrev: () => void
@@ -67,6 +74,7 @@ export default function ViewerUI({
   images,
   currentIndex,
   description,
+  credits,
   onClose,
   onNext,
   onPrev,
@@ -126,6 +134,10 @@ export default function ViewerUI({
     }
     return false
   })()
+
+  const hasCredits = Array.isArray(credits) && credits.length > 0
+  // Le panneau infos s'ouvre s'il y a au moins une description ou des crédits
+  const hasInfos = hasDescription || hasCredits
 
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 })
 
@@ -222,7 +234,7 @@ export default function ViewerUI({
         >
           Home
         </button>
-        {hasDescription && (
+        {hasInfos && (
           <button
             className={`viewer-infos-mobile ${showInfos ? 'active' : ''}`}
             onClick={onToggleInfos}
@@ -245,7 +257,7 @@ export default function ViewerUI({
           <span className="viewer-counter">
             {String(currentIndex + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
           </span>
-          {hasDescription && (
+          {hasInfos && (
             <button
               className={`viewer-infos-toggle ${showInfos ? 'active' : ''}`}
               onClick={onToggleInfos}
@@ -256,7 +268,7 @@ export default function ViewerUI({
         </div>
       </footer>
 
-      {hasDescription && (
+      {hasInfos && (
         <>
           <div
             className={`viewer-description-backdrop ${showInfos ? 'visible' : ''}`}
@@ -283,6 +295,28 @@ export default function ViewerUI({
               <div className="viewer-description-text">
                 {renderDescription()}
               </div>
+              {hasCredits && (
+                <div className="viewer-credits">
+                  {credits!.map((c, i) => (
+                    <div key={i} className="viewer-credit">
+                      <span className="viewer-credit-role">{c.role} :</span>
+                      {c.url ? (
+                        <a
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="viewer-credit-name"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {c.name}
+                        </a>
+                      ) : (
+                        <span className="viewer-credit-name">{c.name}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </>

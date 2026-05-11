@@ -78,6 +78,42 @@ export default {
       options: {
         disableAlpha: true
       }
+    },
+    {
+      name: 'credits',
+      title: 'Crédits',
+      type: 'array',
+      description: 'Crédits affichés sous la description dans le panneau infos du viewer (photographe collaborateur, stylisme, etc.). Le nom devient cliquable si une URL est renseignée.',
+      of: [{
+        type: 'object',
+        fields: [
+          {
+            name: 'role',
+            title: 'Rôle',
+            type: 'string',
+            description: 'Ex : "Photographie", "Conception", "Stylisme"',
+            validation: Rule => Rule.required()
+          },
+          {
+            name: 'name',
+            title: 'Nom',
+            type: 'string',
+            validation: Rule => Rule.required()
+          },
+          {
+            name: 'url',
+            title: 'Lien (optionnel)',
+            type: 'url',
+            description: 'Si renseigné, le nom devient un lien cliquable'
+          }
+        ],
+        preview: {
+          select: { role: 'role', name: 'name' },
+          prepare({ role, name }) {
+            return { title: `${role} : ${name}` }
+          }
+        }
+      }]
     }
   ],
   // Tri par défaut dans le Studio
