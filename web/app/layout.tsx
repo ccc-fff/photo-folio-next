@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
+
+const inter = localFont({
+  src: "./fonts/InterVariable.woff2",
+  variable: "--font-sans",
+  display: "swap",
+  weight: "100 900",
+});
 
 export const metadata: Metadata = {
   title: "Frédéric Fornini — Photographe",
@@ -33,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={inter.variable}>
       <head>
         {/* Preconnect au CDN Sanity pour accélérer le chargement des images */}
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
