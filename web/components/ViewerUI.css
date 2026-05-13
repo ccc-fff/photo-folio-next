@@ -118,7 +118,7 @@
 }
 
 .viewer-description-text {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: var(--font-weight-light);
   line-height: 1.4;
   color: white;
@@ -169,6 +169,13 @@ a.viewer-credit-name {
 
 a.viewer-credit-name:hover {
   font-weight: var(--font-weight-medium);
+}
+
+/* Breakpoint large desktop : la description respire un peu plus */
+@media (min-width: 1440px) {
+  .viewer-description-text {
+    font-size: 32px;
+  }
 }
 
 @media (max-width: 768px) {
