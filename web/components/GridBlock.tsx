@@ -105,6 +105,7 @@ export default function GridBlock({
   return (
     <div
       className={`grid-item ${isAnimatingOut ? 'fading-out' : ''} ${isAnimatingIn ? 'fading-in' : ''}`}
+      data-series-slug={image.seriesSlug}
       style={{
         position: 'absolute',
         left: 0,
