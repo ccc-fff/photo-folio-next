@@ -86,7 +86,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 50%;
+  right: 0;
+  width: 100%;
   height: 100vh;
   cursor: pointer;
   opacity: 0;
@@ -101,7 +102,8 @@
 .viewer-description {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 50%;
   height: 100vh;
   padding: var(--margin-desktop);
