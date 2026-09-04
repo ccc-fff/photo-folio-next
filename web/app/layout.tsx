@@ -5,10 +5,10 @@ import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
 
 const inter = localFont({
-  src: "./fonts/InterVariable.woff2",
+  src: "./fonts/InterVariable-latin.woff2",
   variable: "--font-sans",
   display: "swap",
-  weight: "100 900",
+  weight: "300 500",
 });
 
 export const metadata: Metadata = {
