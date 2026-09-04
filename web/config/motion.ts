@@ -55,7 +55,7 @@ export const MOTION_CONFIG = {
   // HIGHLIGHT SERIES
   HIGHLIGHT: {
     appear: 450,
-    switch: 650,
+    switch: 950,
     disappear: 450,
   },
 
