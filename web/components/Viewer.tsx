@@ -134,6 +134,11 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
   const blurAnim = getAnimProps(elementStates.blur, 200, 'ease-out')
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
+  // Picto ←/→ : piloté par les events du conteneur (hit-testing natif).
+  // Survoler un élément d'une couche supérieure (Home, infos, panneau) déclenche
+  // mouseleave sur le conteneur → le picto disparaît sans logique de coordination.
+  const [cursorSide, setCursorSide] = useState<'left' | 'right' | null>(null)
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
 
   // Helper pour extraire un titre localisé
   const getTitle = (title: LocalizedString | undefined): string => {
@@ -176,6 +181,17 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
     else onNext()
   }
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const midX = rect.left + rect.width / 2
+    setCursorSide(e.clientX < midX ? 'left' : 'right')
+    setCursorPos({ x: e.clientX, y: e.clientY })
+  }
+
+  const handleMouseLeave = () => {
+    setCursorSide(null)
+  }
+
   if (!images || images.length === 0) return null
 
   const currentImage = images[currentIndex]
@@ -199,6 +215,8 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
         onClick={handleImageClick}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         <img
           src={getOptimalUrl(currentImage)}
@@ -208,6 +226,15 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
           onLoad={() => setLoadedImageId(currentImage?.id)}
         />
       </div>
+      {/* Hors du conteneur : position fixed, et échappe à l'opacity/blur du conteneur */}
+      {cursorSide && (
+        <div
+          className="viewer-cursor"
+          style={{ left: cursorPos.x, top: cursorPos.y }}
+        >
+          {cursorSide === 'left' ? '←' : '→'}
+        </div>
+      )}
     </div>
   )
 }

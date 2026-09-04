@@ -31,6 +31,19 @@
   transition: opacity 200ms ease;
 }
 
+.viewer-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  font-family: inherit;
+  font-size: var(--font-size-desktop);
+  font-weight: var(--font-weight-light);
+  color: white;
+  /* Blanc + difference : le picto s'inverse sur fond clair (convention des couches UI) */
+  mix-blend-mode: difference;
+}
+
 @media (max-width: 768px) {
   .viewer-overlay {
     height: calc(var(--vh, 1vh) * 100);
@@ -56,5 +69,9 @@
     max-height: 100%;
     object-fit: contain;
     object-position: center bottom;
+  }
+
+  .viewer-cursor {
+    display: none;
   }
 }

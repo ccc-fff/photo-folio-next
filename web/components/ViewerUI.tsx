@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { PortableText } from '@portabletext/react'
 import { useI18n, LocalizedField } from '@/lib/i18n'
 import './ViewerUI.css'
@@ -85,8 +85,6 @@ export default function ViewerUI({
   const uiAnim = getAnimProps(elementStates.ui, 200, 'ease-out')
   const infosAnim = getAnimProps(elementStates.infos, 200, 'ease-out')
   const showInfos = infosAnim.state === 'visible'
-  const [cursorSide, setCursorSide] = useState<'left' | 'right' | null>(null)
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
 
   // Helper pour récupérer le titre de série localisé
   const getSeriesTitle = (title: string | { fr: string; en: string } | undefined) => {
@@ -176,43 +174,6 @@ export default function ViewerUI({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose, onNext, onPrev, showInfos, onToggleInfos])
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const imageContainer = document.querySelector('.viewer-image-container')
-      if (!imageContainer) {
-        setCursorSide(null)
-        return
-      }
-
-      const rect = imageContainer.getBoundingClientRect()
-      const isOverImage = (
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom
-      )
-
-      if (isOverImage) {
-        const imageMidX = rect.left + rect.width / 2
-        setCursorSide(e.clientX < imageMidX ? 'left' : 'right')
-        setCursorPos({ x: e.clientX, y: e.clientY })
-      } else {
-        setCursorSide(null)
-      }
-    }
-
-    const handleMouseLeave = () => {
-      setCursorSide(null)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseleave', handleMouseLeave)
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseleave', handleMouseLeave)
-    }
-  }, [])
 
   if (!images || images.length === 0) return null
 
@@ -322,14 +283,6 @@ export default function ViewerUI({
         </>
       )}
 
-      {cursorSide && (
-        <div
-          className="viewer-cursor"
-          style={{ left: cursorPos.x, top: cursorPos.y }}
-        >
-          {cursorSide === 'left' ? '←' : '→'}
-        </div>
-      )}
     </div>
   )
 }

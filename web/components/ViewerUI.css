@@ -126,17 +126,6 @@
   color: white;
 }
 
-.viewer-cursor {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  font-family: inherit;
-  font-size: var(--font-size-desktop);
-  font-weight: var(--font-weight-light);
-  color: white;
-}
-
 .viewer-credits {
   margin-top: 2em;
   display: flex;
@@ -281,9 +270,5 @@ a.viewer-credit-name:hover {
   .viewer-credits {
     font-size: var(--font-size-mobile);
     margin-top: 1.5em;
-  }
-
-  .viewer-cursor {
-    display: none;
   }
 }
