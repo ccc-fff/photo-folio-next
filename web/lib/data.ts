@@ -5,6 +5,7 @@
  * Les données sont intégrées dans le HTML généré
  */
 import { client, urlFor } from './sanity'
+import { prettyImageUrl, imageFileName } from './prettyImageUrl'
 import { SERIES_QUERY, ABOUT_QUERY, SITE_SETTINGS_QUERY } from './queries'
 
 // Types pour champs localisés (fr/en)
@@ -103,21 +104,23 @@ export async function getSiteData() {
     for (let i = 0; i < count; i++) {
       const img = serie.images[i]
       if (img) {
+        // Nom de fichier lisible pour qui enregistre l'image (clic droit, drag)
+        const fileName = imageFileName(serie.slug, i)
         // PERFORMANCE: .auto('format') convertit PNG/JPG en WebP/AVIF selon le navigateur
-        const imgBuilder = (w: number) => urlFor(img.asset).width(w).auto('format')
+        const imgBuilder = (w: number) => prettyImageUrl(urlFor(img.asset).width(w).auto('format').url(), fileName)
         // LQIP: image minuscule floutée (~500 bytes) pour placeholder
-        const lqipBuilder = urlFor(img.asset).width(20).blur(50).quality(20).auto('format')
+        const lqipBuilder = prettyImageUrl(urlFor(img.asset).width(20).blur(50).quality(20).auto('format').url(), fileName)
 
         // Extraire le titre (string ou localisé)
         const titleStr = typeof serie.title === 'string' ? serie.title : serie.title?.fr || ''
 
         images.push({
           id: img._key,
-          url: imgBuilder(800).url(),
+          url: imgBuilder(800),
           // srcSet pour images adaptatives selon viewport/DPR
-          srcSet: `${imgBuilder(400).url()} 400w, ${imgBuilder(800).url()} 800w, ${imgBuilder(1200).url()} 1200w`,
-          urlLarge: imgBuilder(1600).url(),
-          lqip: lqipBuilder.url(),
+          srcSet: `${imgBuilder(400)} 400w, ${imgBuilder(800)} 800w, ${imgBuilder(1200)} 1200w`,
+          urlLarge: imgBuilder(1600),
+          lqip: lqipBuilder,
           alt: img.alt || titleStr,
           seriesId: serie._id,
           seriesSlug: serie.slug,

@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/photos/:file/:name",
+      "destination": "https://cdn.sanity.io/images/nbpf7c4u/production/:file"
+    }
+  ]
+}

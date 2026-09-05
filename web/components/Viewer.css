@@ -27,7 +27,9 @@
   object-fit: contain;
   object-position: bottom center;
   user-select: none;
-  -webkit-user-drag: none;
+  /* drag natif volontairement actif : glisser l'image l'enregistre sous son
+     nom lisible (fredericfornini_serie_NN.jpg) — la grille, elle, reste
+     draggable=false car le drag y déplace la grille */
   transition: opacity 200ms ease;
 }
 
