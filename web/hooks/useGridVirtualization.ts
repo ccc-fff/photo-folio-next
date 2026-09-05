@@ -308,14 +308,17 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config) {
     if (targetMag < 0.01 && !isDraggingRef.current) {
       vel.x *= activeFriction
       vel.y *= activeFriction
+      // Coupe anti-résidu : seulement quand plus rien ne pousse. Appliquée
+      // inconditionnellement, elle étrangle tout démarrage depuis zéro vers une
+      // cible douce (incrément lerp < threshold) → grille mobile gelée à l'init
+      // (~25 % des directions) et après chaque menu/viewer (100 %).
+      if (Math.abs(vel.x) < threshold) vel.x = 0
+      if (Math.abs(vel.y) < threshold) vel.y = 0
     }
     if (mode === 'decelerating' && targetMag > 0.01) {
       vel.x *= transitionFriction
       vel.y *= transitionFriction
     }
-
-    if (Math.abs(vel.x) < threshold) vel.x = 0
-    if (Math.abs(vel.y) < threshold) vel.y = 0
 
     const hasMovement = Math.abs(vel.x) > threshold || Math.abs(vel.y) > threshold
 
