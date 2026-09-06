@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useI18n } from '@/lib/i18n'
+import { track } from '@/lib/track'
 import './Viewer.css'
 
 // Type pour titre localisé
@@ -229,6 +230,8 @@ export default function Viewer({ images, currentIndex, viewerScale = 100, onNext
           className="viewer-image"
           fetchPriority="high"
           onLoad={() => setLoadedImageId(currentImage?.id)}
+          onDragStart={() => track('image-save-intent', { via: 'drag' })}
+          onContextMenu={() => track('image-save-intent', { via: 'contextmenu' })}
         />
       </div>
       {/* Hors du conteneur : position fixed, et échappe à l'opacity/blur du conteneur */}

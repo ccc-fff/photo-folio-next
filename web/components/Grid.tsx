@@ -11,6 +11,7 @@ import { filterTrulyVisibleBlocks, getBlockRanksByDistance, getBlockCenter, getD
 import { MOTION_CONFIG } from '@/config/motion'
 import { getTextColor } from '@/utils/colorUtils'
 import { buildViewerData, type ViewerData } from '@/lib/viewerData'
+import { track } from '@/lib/track'
 import GridBlock from './GridBlock'
 import Header from './Header'
 const Viewer = dynamic(() => import('./Viewer'), { ssr: false })
@@ -177,6 +178,7 @@ export default function Grid({
     if (!initialViewerData || hasInitialDirectOpen.current) return
     hasInitialDirectOpen.current = true
     play('open-viewer-direct')
+    track('viewer-open', { source: 'direct' })
   }, [initialViewerData, play])
 
   // Bouton retour/avant du navigateur : aligner le viewer sur l'URL.
@@ -246,6 +248,7 @@ export default function Grid({
     const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
 
     play('open-viewer', { staggerDuration, data: { viewer: viewerData } })
+    track('viewer-open', { source: 'grid' })
 
     if (fullSeries.slug) {
       const url = clickedImage.indexInSeries > 0
@@ -555,6 +558,7 @@ export default function Grid({
             }
 
             const viewerData = buildViewerData(fullSeries, 0, getTitle)
+            track('viewer-open', { source: 'menu' })
 
             scrollToSeries(null)
 

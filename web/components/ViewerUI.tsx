@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { PortableText } from '@portabletext/react'
 import { useI18n, LocalizedField } from '@/lib/i18n'
+import { track } from '@/lib/track'
 import './ViewerUI.css'
 
 // Type pour Portable Text block
@@ -85,6 +86,11 @@ export default function ViewerUI({
   const uiAnim = getAnimProps(elementStates.ui, 200, 'ease-out')
   const infosAnim = getAnimProps(elementStates.infos, 200, 'ease-out')
   const showInfos = infosAnim.state === 'visible'
+
+  const handleToggleInfos = () => {
+    if (!showInfos) track('infos-open')
+    onToggleInfos()
+  }
 
   // Helper pour récupérer le titre de série localisé
   const getSeriesTitle = (title: string | { fr: string; en: string } | undefined) => {
@@ -198,7 +204,7 @@ export default function ViewerUI({
         {hasInfos && (
           <button
             className={`viewer-infos-mobile ${showInfos ? 'active' : ''}`}
-            onClick={onToggleInfos}
+            onClick={handleToggleInfos}
           >
             {showInfos ? 'close' : 'infos'}
           </button>
@@ -221,7 +227,7 @@ export default function ViewerUI({
           {hasInfos && (
             <button
               className={`viewer-infos-toggle ${showInfos ? 'active' : ''}`}
-              onClick={onToggleInfos}
+              onClick={handleToggleInfos}
             >
               {showInfos ? 'close' : 'infos'}
             </button>
@@ -267,7 +273,10 @@ export default function ViewerUI({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="viewer-credit-name"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            track('credit-click', { name: c.name })
+                          }}
                         >
                           {c.name}
                         </a>

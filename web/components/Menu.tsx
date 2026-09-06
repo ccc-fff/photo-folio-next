@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { PortableText } from '@portabletext/react'
 import { urlFor } from '@/lib/sanity'
 import { useI18n } from '@/lib/i18n'
+import { track } from '@/lib/track'
 import type { Series, About } from '@/lib/data'
 import './Menu.css'
 
@@ -144,6 +145,7 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               target={contact.type === 'url' ? '_blank' : undefined}
               rel={contact.type === 'url' ? 'noopener noreferrer' : undefined}
               className="menu-nav-item"
+              onClick={() => track('contact-click', { label: getContactLabel(contact) })}
             >
               {getContactLabel(contact)}
             </a>
@@ -234,6 +236,7 @@ export default function Menu({ series, about, onClose, onSeriesHover, onSeriesCl
               target={contact.type === 'url' ? '_blank' : undefined}
               rel={contact.type === 'url' ? 'noopener noreferrer' : undefined}
               className="menu-nav-item"
+              onClick={() => track('contact-click', { label: getContactLabel(contact) })}
             >
               {getContactLabel(contact)}
             </a>
