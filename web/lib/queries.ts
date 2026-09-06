@@ -12,6 +12,7 @@ export const SERIES_QUERY = `
     "slug": slug.current,
     order,
     gridCount,
+    viewerScale,
     description,
     shortDescription,
     client,

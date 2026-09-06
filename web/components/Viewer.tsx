@@ -24,6 +24,8 @@ interface AnimState {
 interface ViewerProps {
   images: ViewerImage[]
   currentIndex: number
+  /** % de la hauteur d'écran occupé par l'image (desktop seulement), réglé par série dans le BO */
+  viewerScale?: number
   onNext: () => void
   onPrev: () => void
   elementStates?: {
@@ -128,7 +130,7 @@ const getAnimProps = (element: AnimState | string | undefined, defaultDuration =
   }
 }
 
-export default function Viewer({ images, currentIndex, onNext, onPrev, elementStates = {} }: ViewerProps) {
+export default function Viewer({ images, currentIndex, viewerScale = 100, onNext, onPrev, elementStates = {} }: ViewerProps) {
   const { t } = useI18n()
   const imgAnim = getAnimProps(elementStates.image, 500, 'ease-out')
   const blurAnim = getAnimProps(elementStates.blur, 200, 'ease-out')
@@ -208,7 +210,10 @@ export default function Viewer({ images, currentIndex, onNext, onPrev, elementSt
   }
 
   return (
-    <div className="viewer-overlay">
+    <div
+      className="viewer-overlay"
+      style={{ '--viewer-scale': viewerScale / 100 } as React.CSSProperties}
+    >
       <div
         className="viewer-image-container"
         style={imgStyle}

@@ -54,6 +54,7 @@ export interface Series {
   slug: string
   order: number
   gridCount: number
+  viewerScale?: number
   description: LocalizedRichText
   shortDescription: LocalizedString
   client: LocalizedString

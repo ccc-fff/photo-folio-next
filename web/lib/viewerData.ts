@@ -37,6 +37,7 @@ export function buildViewerData(
     seriesId: series._id,
     seriesImages,
     currentIndex: safeIndex,
+    viewerScale: series.viewerScale ?? 100,
     backgroundColor: series.backgroundColor || null,
     description: series.description || null,
     credits: series.credits || null

@@ -21,7 +21,9 @@
 }
 
 .viewer-image {
-  height: 100%;
+  /* --viewer-scale : réglage par série depuis le BO (desktop ; le bloc mobile
+     ci-dessous redéfinit les dimensions et n'est pas affecté) */
+  height: calc(100% * var(--viewer-scale, 1));
   width: auto;
   max-width: 100vw;
   object-fit: contain;

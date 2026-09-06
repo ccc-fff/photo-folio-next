@@ -436,14 +436,7 @@ export default function Grid({
   }
   type LocalizedRichText = { fr: PortableTextBlock[]; en: PortableTextBlock[] } | PortableTextBlock[] | string
 
-  const viewerState = state.viewer as {
-    seriesId: string
-    seriesImages: Array<{ id: string; url: string; srcSet: string; alt: string; seriesTitle: LocalizedString }>
-    currentIndex: number
-    backgroundColor: string | null
-    description: LocalizedRichText | null
-    credits: Array<{ role: string; name: string; url?: string }> | null
-  } | null
+  const viewerState = state.viewer as ViewerData | null
 
   return (
     <main
@@ -504,6 +497,7 @@ export default function Grid({
         <Viewer
           images={viewerState.seriesImages}
           currentIndex={viewerState.currentIndex}
+          viewerScale={viewerState.viewerScale}
           onNext={handleViewerNext}
           onPrev={handleViewerPrev}
           elementStates={{

@@ -46,6 +46,14 @@ export default {
       validation: Rule => Rule.required().min(1)
     },
     {
+      name: 'viewerScale',
+      title: 'Taille dans le viewer — desktop (%)',
+      type: 'number',
+      description: 'Pourcentage de la hauteur d\'écran occupé par les images de cette série dans le viewer desktop. 100 = plein écran (comportement par défaut). Le mobile n\'est pas affecté.',
+      initialValue: 100,
+      validation: Rule => Rule.min(30).max(100)
+    },
+    {
       name: 'images',
       title: 'Images',
       type: 'array',
