@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Analytics } from "@vercel/analytics/next";
 import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
 
@@ -51,7 +50,18 @@ export default function RootLayout({
         <I18nProvider>
           {children}
         </I18nProvider>
-        <Analytics />
+        {/* Umami self-hosted (base Neon) — script et endpoint proxifiés par le
+            domaine (rewrites /stats/* dans vercel.json) pour passer les bloqueurs.
+            data-domains évite de compter dev local et previews. */}
+        {process.env.NODE_ENV === "production" && (
+          <script
+            defer
+            src="/stats/script.js"
+            data-website-id="4acd53f7-31fb-4ff5-b14d-8ecd467c405d"
+            data-host-url="https://fredericfornini.com/stats"
+            data-domains="fredericfornini.com"
+          />
+        )}
       </body>
     </html>
   );

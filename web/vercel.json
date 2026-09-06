@@ -3,6 +3,14 @@
     {
       "source": "/photos/:file/:name",
       "destination": "https://cdn.sanity.io/images/nbpf7c4u/production/:file"
+    },
+    {
+      "source": "/stats/script.js",
+      "destination": "https://umami-frederic-forninis-projects.vercel.app/script.js"
+    },
+    {
+      "source": "/stats/api/send",
+      "destination": "https://umami-frederic-forninis-projects.vercel.app/api/send"
     }
   ]
 }
