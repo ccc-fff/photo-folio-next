@@ -45,8 +45,11 @@ export const SEQUENCES: Record<string, Sequence> = {
     { at: 'stagger-end', set: { header: true, grid: 'visible', motion: 'active' } },
   ],
   'initial-load': [
-    { at: 0, set: { grid: 'fading-in', motion: 'active' } },
-    { at: 'stagger-end', set: { header: true, grid: 'visible' } },
+    // header: true dès t=0 — le LCP (texte header) n'attend plus la fin du stagger.
+    // La séquence d'intro reste intacte : la grille stagger sur toute sa durée,
+    // seul le header est découplé.
+    { at: 0, set: { grid: 'fading-in', motion: 'active', header: true } },
+    { at: 'stagger-end', set: { grid: 'visible' } },
   ],
   'show-infos': [
     { at: 0, set: { viewerBlur: { state: 'active', duration: 600, ease: 'ease-out' } } },
