@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entrailles — Frédéric Fornini chez Slika slowprint</title>
+<meta name="description" content="Exposition Entrailles de Frédéric Fornini chez Slika slowprint, 32 rue Gabrielle, Paris 18ᵉ. Vernissage le jeudi 15 octobre 2026, 19 h – 22 h. Exposition du 16 au 31 octobre. Entrée libre.">
+<meta property="og:title" content="Entrailles — Frédéric Fornini chez Slika slowprint">
+<meta property="og:description" content="Vernissage jeudi 15 octobre, 19 h – 22 h · Exposition du 16 au 31 octobre · 32 rue Gabrielle, Paris 18ᵉ">
+<meta property="og:image" content="https://fredericfornini.com/vernissage/s1.jpg">
+<style>
+  @font-face{
+    font-family:"Inter";
+    src:url("inter.woff2") format("woff2"); /* instance statique SemiBold 600 — vérifiée usWeightClass 600 */
+    font-weight:600;
+    font-style:normal;
+    font-display:swap;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{ --u: calc(100vw / 1080); --ink:#111; } /* valeur de départ, recalée par le script (clamp hauteur) */
+  html,body{height:100%}
+  body{font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:#b8c7de;
+       -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale} /* aligne le rendu macOS sur Figma */
+
+  /* ---- Scène plein écran ---- */
+  .scene{height:100svh;display:flex;flex-direction:column;justify-content:space-between;
+         overflow:hidden;background:#b8c7de;}
+  header{display:flex;justify-content:space-between;align-items:flex-start;
+         padding: calc(20*var(--u)) calc(20*var(--u)) 0;}
+  /* Typo = calques Figma : Inter SemiBold, approche 0 ; corps/interligne/colonne par mode (variables du script) */
+  .cartouche{font-weight:600;font-size:calc(var(--fs)*var(--u));line-height:calc(var(--lh)*var(--u))}
+  .cartouche .l{display:flex}
+  /* padding DANS la colonne (border-box) : la valeur reste à --col quand le libellé tient ;
+     garde une respiration quand le rendu navigateur déborde la colonne de la maquette
+     (« Vernissage » : 293,3 u mesurés pour une colonne de 292 — Inter rend ~1 % plus large que Figma) */
+  .cartouche .l span:first-child{min-width:calc(var(--col)*var(--u));padding-right:.25em}
+  header img{height:calc(var(--logo)*var(--u));width:auto;display:block}
+  .slika-lien{color:inherit;text-decoration:none}
+
+  /* ---- Frise ---- */
+  .fenetre{flex:1;display:flex;align-items:center;min-height:0}
+  .rail{display:flex;align-items:flex-start;gap:calc(20*var(--u));
+        padding-left:calc(20*var(--u));
+        height:calc(var(--hmax)*var(--u));
+        will-change:transform;}
+  .rail img{--w0:600;--h0:900;display:block;object-fit:cover;flex:none;
+            width:calc(var(--w0)*var(--u));height:calc(var(--h0)*var(--u));}
+
+  /* ---- Liens ---- */
+  nav{padding: 0 calc(20*var(--u)) calc(max(20*var(--u), env(safe-area-inset-bottom))) }
+  nav a{display:table;color:var(--ink);font-weight:600;font-size:calc(var(--fs)*var(--u));
+        line-height:calc(var(--lh)*var(--u));text-decoration:underline;text-underline-offset:.14em}
+
+  /* ---- Sous le pli ---- */
+  @media (prefers-reduced-motion: reduce){
+    .scene,.rail,.rail img{animation:none !important}
+  }
+</style>
+</head>
+<body>
+
+<section class="scene" id="scene" aria-label="Annonce de l'exposition">
+  <header>
+    <div class="cartouche">
+      <div>Frédéric Fornini</div>
+      <div>Entrailles</div>
+      <div class="l"><span>Vernissage</span><span>15.10, 19h - 22h</span></div>
+      <div class="l"><span>Exposition</span><span>16.10&nbsp;→&nbsp;31.10.26</span></div>
+      <div><a class="slika-lien" href="https://www.slikaprint.com/expositions/" target="_blank" rel="noopener">Slika</a></div>
+      <div>32 rue Gabrielle, 75018 Paris</div>
+    </div>
+    <img src="slika.svg" alt="Slika slowprint">
+  </header>
+
+  <div class="fenetre">
+    <div class="rail" id="rail">
+      <img src="s1.jpg" alt="Givre sur une vitre bleu clair">
+      <img src="s2.jpg" alt="Capot bleu, essuie-glace, reflets de ciel">
+      <img src="s3.jpg" alt="Rouleau d'adhésif et boîte derrière un pare-brise">
+      <img src="s4.jpg" alt="Chardons séchés contre une carrosserie bleue">
+      <img src="s5.jpg" alt="Baguette de pain posée sur un capot noir">
+      <img src="s6.jpg" alt="Capot clair taché de feuilles orangées">
+      <img src="s7.jpg" alt="Surface grise granuleuse, petites feuilles mortes">
+      <img src="s1.jpg" alt="" aria-hidden="true">
+      <img src="s2.jpg" alt="" aria-hidden="true">
+      <img src="s3.jpg" alt="" aria-hidden="true">
+      <img src="s4.jpg" alt="" aria-hidden="true">
+      <img src="s5.jpg" alt="" aria-hidden="true">
+    </div>
+  </div>
+
+  <nav>
+    <a href="vernissage.ics" download>Ajouter au calendrier</a>
+    <a href="frederic-fornini.vcf" download>Enregistrer les coordonnées</a>
+    <a href="https://www.instagram.com/fredericfornini/" target="_blank" rel="noopener">Instagram</a>
+  </nav>
+</section>
+
+<script>
+(function(){
+  /* Paramètres — transcription exacte des compositions Figma Motion */
+  const PAUSE = 1.5, TRANS = 0.6, N = 7, DUREE = N * (PAUSE + TRANS); // 14.7
+  const BEZ = "cubic-bezier(0.40686, 0, 0.04727, 1)";
+  const COULEURS = ["#b8c7de","#7ca1bd","#f96f59","#caab7d","#6b6359","#a0a7a7","#617678"];
+  const pc = t => (t / DUREE * 100).toFixed(4) + "%";
+  const tDeb = i => (i - 1) * (PAUSE + TRANS) + PAUSE, tFin = i => i * (PAUSE + TRANS);
+
+  const MOBILE = {   // fenêtre deux-pleines (frame 1795:738)
+    actif: 720, sortie: 600, hmax: 1080, designW: 1080,
+    fs: 54, lh: 59, col: 292, logo: 72,
+    wSlot: s => s <= 0 ? 600 : (s <= 2 ? 720 : 600)
+  };
+  const DESKTOP = {  // cascade par emplacement (frame 1796:82)
+    actif: 450, sortie: 400, hmax: 675, designW: 1680,
+    fs: 32, lh: 35, col: 171, logo: 80,
+    wSlot: s => s <= 0 ? 400 : [450,400,360,330,301,289,284][Math.min(s,7)-1]
+  };
+
+  const rail = document.getElementById("rail");
+  const scene = document.getElementById("scene");
+  const imgs = [...rail.children];
+  const feuille = document.createElement("style");
+  document.head.appendChild(feuille);
+
+  function construire(mode){
+    const w = s => mode.wSlot(s);
+    const pitch = mode.sortie + 20;
+    const ANIM = `14.7s infinite linear`;
+    let css = "";
+
+    // fond : 7 couleurs, transitions aux pas
+    let kf = `0%{background:${COULEURS[0]}}`;
+    for (let i = 1; i <= N; i++) {
+      kf += `${pc(tDeb(i))}{background:${COULEURS[i-1]};animation-timing-function:${BEZ}}`;
+      kf += `${pc(tFin(i))}{background:${COULEURS[i % N]};animation-timing-function:linear}`;
+    }
+    css += `@keyframes fond{${kf}} .scene{animation:fond ${ANIM}}`;
+
+    // rail : paliers de translation
+    kf = `0%{transform:translateX(0)}`;
+    for (let i = 1; i <= N; i++) {
+      kf += `${pc(tDeb(i))}{transform:translateX(calc(${-pitch*(i-1)}*var(--u)));animation-timing-function:${BEZ}}`;
+      kf += `${pc(tFin(i))}{transform:translateX(calc(${-pitch*i}*var(--u)));animation-timing-function:linear}`;
+    }
+    css += `@keyframes rail{${kf}} .rail{animation:rail ${ANIM};--hmax:${mode.hmax}}`;
+    css += `:root{--fs:${mode.fs};--lh:${mode.lh};--col:${mode.col};--logo:${mode.logo}}`;
+
+    // panneaux : escalier de tailles (emplacement k - pas i)
+    imgs.forEach((img, idx) => {
+      const k = idx + 1;
+      let kw = "", changements = 0;
+      for (let i = 1; i <= N; i++) {
+        if (k - i < 0) break;
+        const avant = w(k - i + 1), apres = w(k - i);
+        if (avant === apres) continue;
+        kw += `${pc(tDeb(i))}{width:calc(${avant}*var(--u));height:calc(${avant*1.5}*var(--u));animation-timing-function:${BEZ}}`;
+        kw += `${pc(tFin(i))}{width:calc(${apres}*var(--u));height:calc(${apres*1.5}*var(--u));animation-timing-function:linear}`;
+        changements++;
+      }
+      const repos = w(k);
+      css += `.rail img:nth-child(${k}){--w0:${repos};--h0:${repos*1.5};`;
+      if (changements) {
+        /* keyframe 100 % EXPLICITE : sans lui, CSS interpole du dernier keyframe vers la
+           valeur de repos sur le reste du cycle — c'était la dérive mesurée. */
+        const wFin = w(k - N <= 0 ? 0 : k - N); // emplacement final du panneau en fin de cycle
+        kw += `100%{width:calc(${wFin}*var(--u));height:calc(${wFin*1.5}*var(--u))}`;
+        css += `animation:p${k} ${ANIM}}`;
+        css += `@keyframes p${k}{0%{width:calc(${repos}*var(--u));height:calc(${repos*1.5}*var(--u))}${kw}}`;
+      } else {
+        css += `animation:none}`;
+      }
+    });
+
+    /* Injection ATOMIQUE : tout s'arrête, reflow, tout repart sur le même battement.
+       (Les redémarrages partiels désynchronisaient rail et panneaux.) */
+    feuille.textContent = "";
+    scene.style.animation = "none"; rail.style.animation = "none";
+    imgs.forEach(i => i.style.animation = "none");
+    void scene.offsetWidth; // reflow
+    scene.style.animation = ""; rail.style.animation = "";
+    imgs.forEach(i => i.style.animation = "");
+    feuille.textContent = css;
+  }
+
+  /* Échelle : comme un auto layout — la zone centrale CONTIENT la frise.
+     Cartouche et liens sont linéaires en u (tout est en unités u), donc le point fixe
+     se résout exactement : u = H / (hmax + chrome/u). L'itération naïve
+     u ← dispo/hmax oscillait (le chrome grandit avec u) et laissait la frise déborder
+     aux fenêtres intermédiaires. 2 itérations de la forme exacte absorbent le seul
+     terme non linéaire (max(20u, safe-area) du nav). */
+  const entete = document.querySelector("header");
+  const liens = document.querySelector("nav");
+  const racine = document.documentElement;
+  const mq = matchMedia("(min-width: 1000px) and (orientation: landscape)");
+
+  function calerEchelle(mode){
+    const uW = innerWidth / mode.designW;
+    const H = scene.clientHeight; // = 100svh réel
+    racine.style.setProperty("--u", uW + "px");
+    for (let passe = 0; passe < 2; passe++) {
+      const u = parseFloat(getComputedStyle(racine).getPropertyValue("--u"));
+      const chrome = (entete.offsetHeight + liens.offsetHeight) / u; // en unités u
+      const uH = H / (mode.hmax + chrome);
+      racine.style.setProperty("--u", Math.min(uW, uH) + "px");
+    }
+  }
+  const applique = () => {
+    const mode = mq.matches ? DESKTOP : MOBILE;
+    construire(mode);
+    calerEchelle(mode);
+  };
+  mq.addEventListener("change", applique);
+  /* resize : on ne recale QUE l'unité --u (ne redémarre aucune animation) ;
+     les keyframes ne sont reconstruits qu'au changement de mode. */
+  let raf = null;
+  addEventListener("resize", () => {
+    if (!raf) raf = requestAnimationFrame(() => {
+      raf = null;
+      calerEchelle(mq.matches ? DESKTOP : MOBILE);
+    });
+  });
+  applique();
+  /* le swap d'Inter change la hauteur du cartouche → re-caler quand la police est posée */
+  if (document.fonts && document.fonts.ready)
+    document.fonts.ready.then(() => calerEchelle(mq.matches ? DESKTOP : MOBILE));
+})();
+</script>
+</body>
+</html>
