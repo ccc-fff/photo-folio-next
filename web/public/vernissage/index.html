@@ -14,7 +14,15 @@
   @font-face{font-family:"Inter V";src:url("/vernissage/inter-var.woff2") format("woff2");
     font-weight:100 900;font-style:normal;font-display:swap}
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{--ink:#000;--paper:#fff;--panel:390px}
+  :root{--ink:#000;--paper:#fff;--panel:390px;
+    /* ---- Réglages des transitions (FF 15/10) ---- */
+    --fade:200ms;                              /* fondu entre pages / entre volets */
+    --slide:450ms;                             /* entrée et sortie du volet desktop */
+    --slide-ease:cubic-bezier(.65,0,.35,1);    /* ease-in-out */
+    --blur:6px;                                /* flou du fond quand le volet est ouvert */
+    --blur-time:250ms;                         /* durée du flou */
+    --slide-delay:150ms;                       /* à l'ouverture : le fond se floute, puis le volet arrive */
+  }
   html{background:var(--paper)}
   body{font-family:"Inter V","Inter",Helvetica,Arial,sans-serif;font-weight:500;font-optical-sizing:auto;
        color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
@@ -35,9 +43,14 @@
   .navlink.on{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
 
   /* ---------- Panneau (plein écran en mobile, colonne de 390 px à droite en desktop) ---------- */
-  .panel{position:fixed;inset:0;z-index:20;background:var(--paper);display:none;flex-direction:column;
-         overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .panel.open{display:flex}
+  .panel{position:fixed;inset:0;z-index:20;background:var(--paper);display:flex;flex-direction:column;
+         overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+         visibility:hidden;opacity:0;pointer-events:none;
+         transition:opacity var(--fade) ease,visibility 0s linear var(--fade)}
+  .panel.open{visibility:visible;opacity:1;pointer-events:auto;transition:opacity var(--fade) ease,visibility 0s}
+  body.lock{overflow:hidden}
+  /* Voile : floute le fond et ferme le volet au clic (desktop) */
+  .scrim{position:fixed;inset:0;z-index:15;display:none}
   .pnav{display:flex;justify-content:space-between;align-items:flex-start;flex:none}
   .grow{flex:1 0 0}
   .work{padding:10px;flex:none}
@@ -69,8 +82,23 @@
 
   @media (min-width:900px){
     .gallery{grid-template-columns:repeat(6,1fr)}
-    .panel{left:auto;width:var(--panel)}
+    /* Volet : glisse depuis la droite ; fermé = hors champ */
+    .panel{left:auto;width:var(--panel);opacity:1;transform:translateX(100%);
+           transition:transform var(--slide) var(--slide-ease),visibility 0s linear var(--slide)}
+    .panel.open{transform:none;transition:transform var(--slide) var(--slide-ease) var(--slide-delay),visibility 0s}
+    /* Passage d'un volet à l'autre : fondu sur place, sans glissement */
+    .panel.swap{transform:none;transition:opacity var(--fade) ease,visibility 0s linear var(--fade)}
+    .panel.swap:not(.open){opacity:0}
+    .panel.swap.open{opacity:1;transition:opacity var(--fade) ease,visibility 0s}
+    .scrim{display:block;visibility:hidden;cursor:default;
+           -webkit-backdrop-filter:blur(0px);backdrop-filter:blur(0px);
+           /* à la fermeture : le volet sort d'abord, puis le fond redevient net */
+           transition:backdrop-filter var(--blur-time) ease var(--slide),-webkit-backdrop-filter var(--blur-time) ease var(--slide),
+                      visibility 0s linear calc(var(--slide) + var(--blur-time))}
+    body.dim .scrim{visibility:visible;-webkit-backdrop-filter:blur(var(--blur));backdrop-filter:blur(var(--blur));
+           transition:backdrop-filter var(--blur-time) ease,-webkit-backdrop-filter var(--blur-time) ease,visibility 0s}
   }
+  @media (prefers-reduced-motion:reduce){ :root{--slide:1ms;--fade:1ms;--blur-time:1ms;--slide-delay:0ms} }
 </style>
 </head>
 <body>
@@ -81,6 +109,7 @@
 </nav>
 
 <main class="gallery" id="gallery" aria-label="Œuvres"></main>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
 
 <!-- Œuvre -->
 <section class="panel" id="p-oeuvre" aria-label="Œuvre">
@@ -172,15 +201,38 @@ g.innerHTML=OEUVRES.map(([n])=>`<button type="button" data-n="${n}" aria-label="
 g.addEventListener("click",e=>{const b=e.target.closest("button");if(b) location.hash="#/oeuvre/"+b.dataset.n});
 
 let courante=null;
-function ouvre(id){document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("open",p.id===id));}
+/* Ouvre un volet (ou ferme tout si id = null).
+   Aucun volet ouvert → le fond se floute puis le volet glisse ; volet → volet : fondu sur place ;
+   fermeture : le volet sort, puis le fond redevient net (délais réglés en CSS). */
+const msVar=n=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n))||0;
+function ouvre(id){
+  const avant=document.querySelector(".panel.open"), apres=id?$(id):null;
+  if(avant===apres) return;
+  if(avant&&apres){
+    avant.classList.add("swap"); apres.classList.add("swap");
+    void apres.offsetWidth; /* fige l'état de départ (opacité 0, sur place) avant le fondu */
+    setTimeout(()=>{avant.classList.remove("swap"); apres.classList.remove("swap")}, msVar("--fade")+50);
+  }
+  if(avant) avant.classList.remove("open");
+  if(apres){ apres.classList.add("open"); apres.scrollTop=0; }
+  document.body.classList.toggle("dim",!!apres);
+  document.body.classList.toggle("lock",!!apres);
+}
+/* Charge l'image avant d'afficher le volet (évite le clignotement), 500 ms au plus */
+function charge(img,src){
+  if(img.getAttribute("src")===src) return Promise.resolve();
+  img.src=src; return Promise.race([img.decode().catch(()=>{}), new Promise(r=>setTimeout(r,500))]);
+}
+$("scrim").addEventListener("click",()=>{location.hash="#/"});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&document.querySelector(".panel.open")) location.hash="#/"});
 function route(){
   const h=location.hash.replace(/^#\/?/,"").split("/");
   if(h[0]==="oeuvre"||h[0]==="commander"){
     const o=OEUVRES.find(x=>x[0]===+h[1]); if(!o){location.hash="#/";return}
     courante=o; const src=`/vernissage/oeuvres/${pad(o[0])}.webp`;
-    if(h[0]==="oeuvre"){ $("oeuvre-img").src=src; $("lien-commander").href="#/commander/"+o[0]; ouvre("p-oeuvre"); }
+    if(h[0]==="oeuvre"){ $("lien-commander").href="#/commander/"+o[0]; charge($("oeuvre-img"),src).then(()=>ouvre("p-oeuvre")); }
     else{
-      $("commande-img").src=src; $("lien-retour-oeuvre").href="#/oeuvre/"+o[0];
+      charge($("commande-img"),src); $("lien-retour-oeuvre").href="#/oeuvre/"+o[0];
       $("f-format").innerHTML=FORMATS[o[2]].map((f,i)=>`<option value="${i}">${f} - ${eur(PRIX[i])}</option>`).join("");
       finitions(); $("err").hidden=true; ouvre("p-commande");
     }
