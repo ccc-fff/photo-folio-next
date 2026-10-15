@@ -101,11 +101,8 @@
     <div class="group">
       <h2 class="t24" style="font-weight:500">Format et finitions</h2>
       <select class="field" name="format" id="f-format" aria-label="Format"></select>
-      <select class="field" name="finition" id="f-finition" aria-label="Finition">
-        <option>Tirage seul</option>
-        <option>Contrecollage dibond</option>
-        <option>Caisse américaine</option>
-      </select>
+      <select class="field" name="finition" id="f-finition" aria-label="Finition"></select>
+      <p class="t18 total" id="total"></p>
     </div>
     <div class="group">
       <h2 class="t24" style="font-weight:500">Coordonnées</h2>
@@ -157,6 +154,13 @@ const OEUVRES=[[1,"_DSF6107",0],[2,"_DSF3192",0],[3,"DSCF1894",0],[4,"_DSF3420",
 /* Même prix pour l'équivalent 3:4 de chaque format (décision FF 15/10) — formats 3:4 = grille Slika, même largeur */
 const FORMATS={0:["20 × 30","30 × 45","40 × 60","60 × 90"],1:["20 × 27","30 × 40","40 × 53","60 × 80"]};
 const PRIX=[150,210,320,520];
+/* Finitions refacturées à prix coûtant = tarifs publics Slika TTC (slikaprint.com/tarifs, relevé 15/10), arrondis à l'euro.
+   Dibond 2 mm. Caisse américaine = caisse + contrecollage dibond 2 mm + montage. 3:4 : grille 4:3 de Slika ;
+   caisse 20×27 / 30×40 / 40×53 absente de leur grille → prix du format 2:3 équivalent (provisoire). */
+const FINITIONS={
+  0:{"Contrecollage dibond":[25,30,34,71],"Caisse américaine":[75,107,134,223]},
+  1:{"Contrecollage dibond":[24,30,33,69],"Caisse américaine":[75,107,134,212]}};
+const eur=v=>v+" €";
 const DEST="frederic@fornini.com", COPIE="info@slikaprint.com";
 
 const pad=n=>String(n).padStart(2,"0");
@@ -175,13 +179,28 @@ function route(){
     if(h[0]==="oeuvre"){ $("oeuvre-img").src=src; $("lien-commander").href="#/commander/"+o[0]; ouvre("p-oeuvre"); }
     else{
       $("commande-img").src=src; $("lien-retour-oeuvre").href="#/oeuvre/"+o[0];
-      $("f-format").innerHTML=FORMATS[o[2]].map((f,i)=>`<option value="${f} cm — ${PRIX[i]} €">${f} - ${PRIX[i]} €</option>`).join("");
-      $("err").hidden=true; ouvre("p-commande");
+      $("f-format").innerHTML=FORMATS[o[2]].map((f,i)=>`<option value="${i}">${f} - ${eur(PRIX[i])}</option>`).join("");
+      finitions(); $("err").hidden=true; ouvre("p-commande");
     }
   } else if(h[0]==="infos") ouvre("p-infos");
   else if(h[0]==="merci") ouvre("p-merci");
   else ouvre(null);
 }
+/* Sélection courante → libellés, prix, total TTC */
+function choix(){
+  const o=courante, i=+$("f-format").value||0, fin=$("f-finition").value||"Tirage seul";
+  const sup=fin==="Tirage seul"?0:FINITIONS[o[2]][fin][i];
+  return {format:`${FORMATS[o[2]][i]} cm`, oeuvre:PRIX[i], finition:fin, sup, total:PRIX[i]+sup};
+}
+function finitions(){
+  const o=courante, i=+$("f-format").value||0, sel=$("f-finition"), avant=sel.value;
+  sel.innerHTML=`<option>Tirage seul</option>`+Object.entries(FINITIONS[o[2]]).map(([k,v])=>`<option value="${k}">${k} + ${eur(v[i])}</option>`).join("");
+  if(avant) sel.value=avant; if(!sel.value) sel.value="Tirage seul";
+  const c=choix();
+  $("total").textContent=c.sup?`Total TTC : ${eur(c.total)} (œuvre ${eur(c.oeuvre)} + ${c.finition.toLowerCase()} ${eur(c.sup)})`:`Total TTC : ${eur(c.total)}`;
+}
+$("f-format").addEventListener("change",finitions);
+$("f-finition").addEventListener("change",finitions);
 addEventListener("hashchange",route); route();
 
 $("form").addEventListener("submit",async e=>{
@@ -193,13 +212,14 @@ $("form").addEventListener("submit",async e=>{
   }
   const o=courante, btn=$("envoyer");
   btn.disabled=true; err.hidden=true;
+  const c=choix();
   const corps={
     "Œuvre":`n° ${o[0]} (${o[1]})`,
-    "Format":d.format, "Finition":d.finition,
+    "Format":`${c.format} — ${c.oeuvre} €`, "Finition":c.sup?`${c.finition} — ${c.sup} €`:c.finition, "Total TTC":`${c.total} €`,
     "Nom":d.nom.trim(), "Prénom":d.prenom.trim(), "email":d.email.trim(), "Téléphone":(d.telephone||"").trim()||"—",
-    "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${d.format})`,
+    "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${c.format})`,
     "_cc":COPIE, "_template":"table", "_captcha":"false",
-    "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${d.format}, ${d.finition.toLowerCase()}). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
+    "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${c.format}, ${c.finition.toLowerCase()}, total TTC ${c.total} €). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
   };
   try{
     const r=await fetch("https://formsubmit.co/ajax/"+DEST,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(corps)});
