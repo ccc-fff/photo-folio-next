@@ -62,6 +62,8 @@ These plant portraits do not document species. They question what each plant kno
 
 ## Bio (À propos)
 
-Art director, photographer, lives in Paris, France.
+Creative director, photographer, lives in Paris, France.
 
-Looking necessarily induces a set of questions; photographing is an invitation to meet them and to share with others this constantly renewed wonder at a world that does not go without saying.
+Looking necessarily raises a set of questions; photographing is an invitation to go and meet them, and then to share with others this ever-renewed wonder at a world that cannot be taken for granted.
+
+*(Version publiée dans Sanity le 27/09/2026. FR : « Regarder soulève nécessairement un ensemble de questions. Photographier est une invitation pour aller à leur rencontre, puis partager avec d'autres cet étonnement sans cesse renouvelé d'un monde qui ne va pas de soi. »)*
