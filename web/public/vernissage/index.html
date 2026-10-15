@@ -7,7 +7,7 @@
 <meta name="description" content="Entrailles, photographies de Frédéric Fornini. Éditions originales limitées à trente exemplaires, tirées par Slika slowprint. Choisir une œuvre et son format.">
 <meta property="og:title" content="Entrailles — Frédéric Fornini">
 <meta property="og:description" content="Choisir une œuvre et son format — éditions limitées à trente exemplaires, tirages Slika slowprint.">
-<meta property="og:image" content="https://fredericfornini.com/vernissage/oeuvres/55.jpg">
+<meta property="og:image" content="https://fredericfornini.com/vernissage/og-entrailles.jpg">
 <link rel="preload" href="/vernissage/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   /* Inter variable (axes opsz 14-32, wght 100-900) — @fontsource-variable/inter 5.2.8, sous-ensemble latin */
@@ -162,7 +162,7 @@ const DEST="frederic@fornini.com", COPIE="info@slikaprint.com";
 const pad=n=>String(n).padStart(2,"0");
 const $=id=>document.getElementById(id);
 const g=$("gallery");
-g.innerHTML=OEUVRES.map(([n])=>`<button type="button" data-n="${n}" aria-label="Œuvre n° ${n}"><img src="/vernissage/oeuvres/t${pad(n)}.jpg" alt="" loading="lazy" decoding="async"></button>`).join("");
+g.innerHTML=OEUVRES.map(([n])=>`<button type="button" data-n="${n}" aria-label="Œuvre n° ${n}"><img src="/vernissage/oeuvres/t${pad(n)}.webp" alt="" loading="lazy" decoding="async"></button>`).join("");
 g.addEventListener("click",e=>{const b=e.target.closest("button");if(b) location.hash="#/oeuvre/"+b.dataset.n});
 
 let courante=null;
@@ -171,7 +171,7 @@ function route(){
   const h=location.hash.replace(/^#\/?/,"").split("/");
   if(h[0]==="oeuvre"||h[0]==="commander"){
     const o=OEUVRES.find(x=>x[0]===+h[1]); if(!o){location.hash="#/";return}
-    courante=o; const src=`/vernissage/oeuvres/${pad(o[0])}.jpg`;
+    courante=o; const src=`/vernissage/oeuvres/${pad(o[0])}.webp`;
     if(h[0]==="oeuvre"){ $("oeuvre-img").src=src; $("lien-commander").href="#/commander/"+o[0]; ouvre("p-oeuvre"); }
     else{
       $("commande-img").src=src; $("lien-retour-oeuvre").href="#/oeuvre/"+o[0];
