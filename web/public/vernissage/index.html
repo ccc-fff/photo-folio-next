@@ -3,227 +3,213 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Entrailles — Frédéric Fornini chez Slika slowprint</title>
-<meta name="description" content="Exposition Entrailles de Frédéric Fornini chez Slika slowprint, 32 rue Gabrielle, Paris 18ᵉ. Vernissage le jeudi 15 octobre 2026, 19 h – 22 h. Exposition du 16 au 31 octobre. Entrée libre.">
-<meta property="og:title" content="Entrailles — Frédéric Fornini chez Slika slowprint">
-<meta property="og:description" content="Vernissage jeudi 15 octobre, 19 h – 22 h · Exposition du 16 au 31 octobre · 32 rue Gabrielle, Paris 18ᵉ">
-<meta property="og:image" content="https://fredericfornini.com/vernissage/s1.jpg">
+<title>Entrailles — Frédéric Fornini</title>
+<meta name="description" content="Entrailles, photographies de Frédéric Fornini. Éditions originales limitées à trente exemplaires, tirées par Slika slowprint. Choisir une œuvre et son format.">
+<meta property="og:title" content="Entrailles — Frédéric Fornini">
+<meta property="og:description" content="Choisir une œuvre et son format — éditions limitées à trente exemplaires, tirages Slika slowprint.">
+<meta property="og:image" content="https://fredericfornini.com/vernissage/oeuvres/55.jpg">
+<link rel="preload" href="/vernissage/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  @font-face{
-    font-family:"Inter";
-    src:url("/vernissage/inter.woff2") format("woff2"); /* instance statique SemiBold 600 — vérifiée usWeightClass 600 */
-    font-weight:600;
-    font-style:normal;
-    font-display:swap;
-  }
+  /* Inter variable (axes opsz 14-32, wght 100-900) — @fontsource-variable/inter 5.2.8, sous-ensemble latin */
+  @font-face{font-family:"Inter V";src:url("/vernissage/inter-var.woff2") format("woff2");
+    font-weight:100 900;font-style:normal;font-display:swap}
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{ --u: calc(100vw / 1080); --ink:#111; } /* valeur de départ, recalée par le script (clamp hauteur) */
-  html,body{height:100%}
-  body{font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:#b8c7de;
-       -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale} /* aligne le rendu macOS sur Figma */
+  :root{--ink:#000;--paper:#fff;--panel:390px}
+  html{background:var(--paper)}
+  body{font-family:"Inter V","Inter",Helvetica,Arial,sans-serif;font-weight:500;font-optical-sizing:auto;
+       color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  button,input,select{font:inherit;color:inherit}
+  a{color:inherit}
+  /* Blocs de texte calés sur la hauteur des capitales (= « leading trim » des calques Figma) */
+  .t24,.t18{line-height:1;text-box:trim-both cap alphabetic}
+  .t24{font-size:24px}
+  .t18{font-size:18px}
 
-  /* ---- Scène plein écran ---- */
-  .scene{height:100svh;display:flex;flex-direction:column;justify-content:space-between;
-         overflow:hidden;background:#b8c7de;}
-  header{display:flex;justify-content:space-between;align-items:flex-start;
-         padding: calc(20*var(--u)) calc(20*var(--u)) 0;}
-  /* Typo = calques Figma : Inter SemiBold, approche 0 ; corps/interligne/colonne par mode (variables du script) */
-  .cartouche{font-weight:600;font-size:calc(var(--fs)*var(--u));line-height:calc(var(--lh)*var(--u))}
-  .cartouche .l{display:flex}
-  /* padding DANS la colonne (border-box) : la valeur reste à --col quand le libellé tient ;
-     garde une respiration quand le rendu navigateur déborde la colonne de la maquette
-     (« Vernissage » : 293,3 u mesurés pour une colonne de 292 — Inter rend ~1 % plus large que Figma) */
-  .cartouche .l span:first-child{min-width:calc(var(--col)*var(--u));padding-right:.25em}
-  header img{height:calc(var(--logo)*var(--u));width:auto;display:block}
-  .slika-lien{color:inherit;text-decoration:none}
+  /* ---------- Galerie ---------- */
+  .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px}
+  .gallery button{display:block;border:0;padding:0;background:#ddd;cursor:pointer;aspect-ratio:24/36;overflow:hidden}
+  .gallery img{display:block;width:100%;height:100%;object-fit:cover}
+  .topnav{position:fixed;inset:0 0 auto 0;z-index:10;display:flex;justify-content:space-between;
+          color:#fff;mix-blend-mode:difference;pointer-events:none}
+  .navlink{display:block;padding:20px 10px;background:none;border:0;cursor:pointer;text-decoration:none;pointer-events:auto}
+  .navlink.on{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
 
-  /* ---- Frise ---- */
-  .fenetre{flex:1;display:flex;align-items:center;min-height:0}
-  .rail{display:flex;align-items:flex-start;gap:calc(20*var(--u));
-        padding-left:calc(20*var(--u));
-        height:calc(var(--hmax)*var(--u));
-        will-change:transform;}
-  .rail img{--w0:600;--h0:900;display:block;object-fit:cover;flex:none;
-            width:calc(var(--w0)*var(--u));height:calc(var(--h0)*var(--u));}
+  /* ---------- Panneau (plein écran en mobile, colonne de 390 px à droite en desktop) ---------- */
+  .panel{position:fixed;inset:0;z-index:20;background:var(--paper);display:none;flex-direction:column;
+         overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .panel.open{display:flex}
+  .pnav{display:flex;justify-content:space-between;align-items:flex-start;flex:none}
+  .grow{flex:1 0 0}
+  .work{padding:10px;flex:none}
+  .work img{display:block;width:100%;height:auto}
+  .thumbwrap{position:absolute;top:0;right:0;padding:20px}
+  .thumbwrap img{display:block;width:80px;height:auto}
+  .form{display:flex;flex-direction:column;gap:40px;padding:10px;flex:none}
+  .group{display:flex;flex-direction:column;gap:10px}
+  .field{display:block;width:100%;height:35px;border:1px solid var(--ink);border-radius:4px;background:var(--paper);
+         padding:0 20px;font-size:18px;font-weight:500;line-height:33px;outline:none;-webkit-appearance:none;appearance:none}
+  .field::placeholder{color:var(--ink);opacity:1}
+  .field:focus{box-shadow:inset 0 0 0 1px var(--ink)}
+  select.field{cursor:pointer;padding-right:44px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 20px center;background-size:12px 8px}
+  .btn{display:flex;justify-content:flex-end;align-items:center;width:100%;height:62px;padding:20px;border:0;border-radius:4px;
+       background:var(--ink);color:var(--paper);font-size:18px;font-weight:500;cursor:pointer}
+  .btn[disabled]{opacity:.5;cursor:wait}
+  .err{color:#b00;font-size:15px;line-height:1.3}
+  .infos{display:flex;flex-direction:column;gap:40px;padding:20px;flex:none}
+  .infos p{line-height:1.22}
+  .infos p+p{margin-top:22px}
+  .tab .row{display:flex;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--ink)}
+  .tab .row:first-child{padding-top:0}
+  .tab .row:last-child{border-bottom:0}
+  .msg{display:flex;flex-direction:column;gap:40px;padding:10px;flex:none}
+  .msg p{line-height:1.2}
+  .hp{position:absolute;left:-9999px}
 
-  /* ---- Liens ---- */
-  nav{padding: 0 calc(20*var(--u)) calc(max(20*var(--u), env(safe-area-inset-bottom))) }
-  nav a{display:table;color:var(--ink);font-weight:600;font-size:calc(var(--fs)*var(--u));
-        line-height:calc(var(--lh)*var(--u));text-decoration:underline;text-underline-offset:.14em}
-
-  /* ---- Sous le pli ---- */
-  @media (prefers-reduced-motion: reduce){
-    .scene,.rail,.rail img{animation:none !important}
+  @media (min-width:900px){
+    .gallery{grid-template-columns:repeat(6,1fr)}
+    .panel{left:auto;width:var(--panel)}
   }
 </style>
 </head>
 <body>
 
-<section class="scene" id="scene" aria-label="Annonce de l'exposition">
-  <header>
-    <div class="cartouche">
-      <div>Frédéric Fornini</div>
-      <div>Entrailles</div>
-      <div class="l"><span>Vernissage</span><span>15.10, 19h - 22h</span></div>
-      <div class="l"><span>Exposition</span><span>16.10&nbsp;→&nbsp;31.10.26</span></div>
-      <div><a class="slika-lien" href="https://www.slikaprint.com/expositions/" target="_blank" rel="noopener">Slika</a></div>
-      <div>32 rue Gabrielle, 75018 Paris</div>
-    </div>
-    <img src="/vernissage/slika.svg" alt="Slika slowprint">
-  </header>
+<nav class="topnav" aria-label="Navigation">
+  <a class="navlink t24" href="#/">Entrailles</a>
+  <a class="navlink t24" href="#/infos">Informations</a>
+</nav>
 
-  <div class="fenetre">
-    <div class="rail" id="rail">
-      <img src="/vernissage/s1.jpg" alt="Givre sur une vitre bleu clair">
-      <img src="/vernissage/s2.jpg" alt="Capot bleu, essuie-glace, reflets de ciel">
-      <img src="/vernissage/s3.jpg" alt="Rouleau d'adhésif et boîte derrière un pare-brise">
-      <img src="/vernissage/s4.jpg" alt="Chardons séchés contre une carrosserie bleue">
-      <img src="/vernissage/s5.jpg" alt="Baguette de pain posée sur un capot noir">
-      <img src="/vernissage/s6.jpg" alt="Capot clair taché de feuilles orangées">
-      <img src="/vernissage/s7.jpg" alt="Surface grise granuleuse, petites feuilles mortes">
-      <img src="/vernissage/s1.jpg" alt="" aria-hidden="true">
-      <img src="/vernissage/s2.jpg" alt="" aria-hidden="true">
-      <img src="/vernissage/s3.jpg" alt="" aria-hidden="true">
-      <img src="/vernissage/s4.jpg" alt="" aria-hidden="true">
-      <img src="/vernissage/s5.jpg" alt="" aria-hidden="true">
+<main class="gallery" id="gallery" aria-label="Œuvres"></main>
+
+<!-- Œuvre -->
+<section class="panel" id="p-oeuvre" aria-label="Œuvre">
+  <div class="pnav">
+    <a class="navlink t24" href="#/">Retour</a>
+    <a class="navlink t24 on" id="lien-commander" href="#/">Commander</a>
+  </div>
+  <div class="grow"></div>
+  <div class="work"><img id="oeuvre-img" alt=""></div>
+</section>
+
+<!-- Commande -->
+<section class="panel" id="p-commande" aria-label="Commander">
+  <div class="pnav"><a class="navlink t24" id="lien-retour-oeuvre" href="#/">Retour</a></div>
+  <div class="thumbwrap"><img id="commande-img" alt=""></div>
+  <div class="grow"></div>
+  <form class="form" id="form" novalidate>
+    <div class="group">
+      <h2 class="t24" style="font-weight:500">Format et finitions</h2>
+      <select class="field" name="format" id="f-format" aria-label="Format"></select>
+      <select class="field" name="finition" id="f-finition" aria-label="Finition">
+        <option>Tirage seul</option>
+        <option>Contrecollage dibond</option>
+        <option>Caisse américaine</option>
+      </select>
+    </div>
+    <div class="group">
+      <h2 class="t24" style="font-weight:500">Coordonnées</h2>
+      <input class="field" name="nom" placeholder="Nom" autocomplete="family-name" required>
+      <input class="field" name="prenom" placeholder="Prénom" autocomplete="given-name" required>
+      <input class="field" name="email" type="email" placeholder="Email" autocomplete="email" required>
+      <input class="field" name="telephone" type="tel" placeholder="Téléphone" autocomplete="tel">
+      <input class="hp" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+    </div>
+    <p class="err" id="err" hidden></p>
+    <button class="btn" type="submit" id="envoyer">Envoyer ma demande</button>
+  </form>
+</section>
+
+<!-- Confirmation -->
+<section class="panel" id="p-merci" aria-label="Demande envoyée">
+  <div class="grow"></div>
+  <div class="msg">
+    <div class="t24"><p>Votre demande a bien été envoyée. Nous revenons vers vous sous 24&nbsp;heures.</p><br><p>Pour commander une autre œuvre, recommencez le parcours.</p></div>
+    <a class="btn" href="#/">Fermer</a>
+  </div>
+</section>
+
+<!-- Informations -->
+<section class="panel" id="p-infos" aria-label="Informations">
+  <div class="pnav">
+    <a class="navlink t24" href="#/">Fermer</a>
+    <a class="navlink t24 on" href="#/infos">Informations</a>
+  </div>
+  <div class="grow"></div>
+  <div class="infos t18">
+    <div>
+      <p>Les photographies d’<i>Entrailles</i> sont des éditions originales limitées à trente exemplaires au total, tous formats et supports confondus, signés et numérotés. Chaque tirage est accompagné d’un certificat d’authenticité portant son numéro dans l’édition.</p>
+      <p>Tirages pigmentaires sur papier Hahnemühle Photo Rag Baryta 315&nbsp;g, réalisés par Slika slowprint.</p>
+    </div>
+    <div class="tab">
+      <div class="row"><span>Format</span><span>Prix</span></div>
+      <div class="row"><span>20 × 30 cm</span><span>150 €</span></div>
+      <div class="row"><span>30 × 45 cm</span><span>210 €</span></div>
+      <div class="row"><span>40 × 60 cm</span><span>320 €</span></div>
+      <div class="row"><span>60 × 90 cm</span><span>520 €</span></div>
     </div>
   </div>
-
-  <nav>
-    <a href="/vernissage/vernissage.ics" download>Ajouter au calendrier</a>
-    <a href="/vernissage/frederic-fornini.vcf" download>Enregistrer les coordonnées</a>
-    <a href="https://www.instagram.com/fredericfornini/" target="_blank" rel="noopener">Instagram</a>
-  </nav>
 </section>
 
 <script>
-(function(){
-  /* Paramètres — transcription exacte des compositions Figma Motion */
-  const PAUSE = 1.5, TRANS = 0.6, N = 7, DUREE = N * (PAUSE + TRANS); // 14.7
-  const BEZ = "cubic-bezier(0.40686, 0, 0.04727, 1)";
-  const COULEURS = ["#b8c7de","#7ca1bd","#f96f59","#caab7d","#6b6359","#a0a7a7","#617678"];
-  const pc = t => (t / DUREE * 100).toFixed(4) + "%";
-  const tDeb = i => (i - 1) * (PAUSE + TRANS) + PAUSE, tFin = i => i * (PAUSE + TRANS);
+/* n°, fichier, 1 = format 3:4 */
+const OEUVRES=[[1,"_DSF6107",0],[2,"_DSF3192",0],[3,"DSCF1894",0],[4,"_DSF3420",0],[5,"_DSF1650",1],[6,"_DSF2968",0],[7,"_DSF8473",0],[8,"_DSF9375",0],[9,"_DSF1769",0],[10,"_DSF0572",0],[11,"DSCF2155",0],[12,"_DSF7995",0],[13,"_DSF6090",0],[14,"_DSF3396",0],[15,"_DSF1723",1],[16,"_DSF6297",0],[17,"_DSF4565",0],[18,"_DSF0444",0],[19,"_DSF2554",0],[20,"_DSF2674",0],[21,"_DSF6133",0],[22,"DSCF2147",0],[23,"_DSF5495",0],[24,"DSCF6750",0],[25,"DSCF6755",0],[26,"_DSF0849 1",1],[27,"_DSF3132",0],[28,"_DSF3514",0],[29,"_DSF0158 1",0],[30,"_DSF2224",0],[31,"DSCF2752",0],[32,"_DSF4183",0],[33,"_DSF8425",0],[34,"DSCF6752",0],[35,"_DSF2101",1],[36,"_DSF5076",0],[37,"_DSF0179 1",0],[38,"_DSF1485",0],[39,"_DSF4906",0],[40,"_DSF8094",0],[41,"_DSF8867",0],[42,"_DSF3216",0],[43,"_DSF0196 2",0],[44,"DSCF6612",0],[45,"_DSF6108",0],[46,"DSCF6621",0],[47,"_DSF6093",0],[48,"_DSF2674",1],[49,"_DSF0167",0],[50,"_DSF6088",0],[51,"_DSF5480",0],[52,"DSCF2149",0],[53,"_DSF5465 2",0],[54,"_DSF5184",0],[55,"_DSF4509",0],[56,"_DSF3224",0]];
+/* Même prix pour l'équivalent 3:4 de chaque format (décision FF 15/10) — formats 3:4 = grille Slika, même largeur */
+const FORMATS={0:["20 × 30","30 × 45","40 × 60","60 × 90"],1:["20 × 27","30 × 40","40 × 53","60 × 80"]};
+const PRIX=[150,210,320,520];
+const DEST="frederic@fornini.com", COPIE="info@slikaprint.com";
 
-  const MOBILE = {   // fenêtre deux-pleines (frame 1795:738)
-    actif: 720, sortie: 600, hmax: 1080, designW: 1080,
-    fs: 54, lh: 59, col: 292, logo: 72,
-    wSlot: s => s <= 0 ? 600 : (s <= 2 ? 720 : 600)
-  };
-  const DESKTOP = {  // cascade par emplacement (frame 1796:82)
-    actif: 450, sortie: 400, hmax: 675, designW: 1680,
-    fs: 32, lh: 35, col: 171, logo: 80,
-    wSlot: s => s <= 0 ? 400 : [450,400,360,330,301,289,284][Math.min(s,7)-1]
-  };
+const pad=n=>String(n).padStart(2,"0");
+const $=id=>document.getElementById(id);
+const g=$("gallery");
+g.innerHTML=OEUVRES.map(([n])=>`<button type="button" data-n="${n}" aria-label="Œuvre n° ${n}"><img src="/vernissage/oeuvres/t${pad(n)}.jpg" alt="" loading="lazy" decoding="async"></button>`).join("");
+g.addEventListener("click",e=>{const b=e.target.closest("button");if(b) location.hash="#/oeuvre/"+b.dataset.n});
 
-  const rail = document.getElementById("rail");
-  const scene = document.getElementById("scene");
-  const imgs = [...rail.children];
-  const feuille = document.createElement("style");
-  document.head.appendChild(feuille);
-
-  function construire(mode){
-    const w = s => mode.wSlot(s);
-    const pitch = mode.sortie + 20;
-    const ANIM = `14.7s infinite linear`;
-    let css = "";
-
-    // fond : 7 couleurs, transitions aux pas
-    let kf = `0%{background:${COULEURS[0]}}`;
-    for (let i = 1; i <= N; i++) {
-      kf += `${pc(tDeb(i))}{background:${COULEURS[i-1]};animation-timing-function:${BEZ}}`;
-      kf += `${pc(tFin(i))}{background:${COULEURS[i % N]};animation-timing-function:linear}`;
+let courante=null;
+function ouvre(id){document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("open",p.id===id));}
+function route(){
+  const h=location.hash.replace(/^#\/?/,"").split("/");
+  if(h[0]==="oeuvre"||h[0]==="commander"){
+    const o=OEUVRES.find(x=>x[0]===+h[1]); if(!o){location.hash="#/";return}
+    courante=o; const src=`/vernissage/oeuvres/${pad(o[0])}.jpg`;
+    if(h[0]==="oeuvre"){ $("oeuvre-img").src=src; $("lien-commander").href="#/commander/"+o[0]; ouvre("p-oeuvre"); }
+    else{
+      $("commande-img").src=src; $("lien-retour-oeuvre").href="#/oeuvre/"+o[0];
+      $("f-format").innerHTML=FORMATS[o[2]].map((f,i)=>`<option value="${f} cm — ${PRIX[i]} €">${f} - ${PRIX[i]} €</option>`).join("");
+      $("err").hidden=true; ouvre("p-commande");
     }
-    css += `@keyframes fond{${kf}} .scene{animation:fond ${ANIM}}`;
+  } else if(h[0]==="infos") ouvre("p-infos");
+  else if(h[0]==="merci") ouvre("p-merci");
+  else ouvre(null);
+}
+addEventListener("hashchange",route); route();
 
-    // rail : paliers de translation
-    kf = `0%{transform:translateX(0)}`;
-    for (let i = 1; i <= N; i++) {
-      kf += `${pc(tDeb(i))}{transform:translateX(calc(${-pitch*(i-1)}*var(--u)));animation-timing-function:${BEZ}}`;
-      kf += `${pc(tFin(i))}{transform:translateX(calc(${-pitch*i}*var(--u)));animation-timing-function:linear}`;
-    }
-    css += `@keyframes rail{${kf}} .rail{animation:rail ${ANIM};--hmax:${mode.hmax}}`;
-    css += `:root{--fs:${mode.fs};--lh:${mode.lh};--col:${mode.col};--logo:${mode.logo}}`;
-
-    // panneaux : escalier de tailles (emplacement k - pas i)
-    imgs.forEach((img, idx) => {
-      const k = idx + 1;
-      let kw = "", changements = 0;
-      for (let i = 1; i <= N; i++) {
-        if (k - i < 0) break;
-        const avant = w(k - i + 1), apres = w(k - i);
-        if (avant === apres) continue;
-        kw += `${pc(tDeb(i))}{width:calc(${avant}*var(--u));height:calc(${avant*1.5}*var(--u));animation-timing-function:${BEZ}}`;
-        kw += `${pc(tFin(i))}{width:calc(${apres}*var(--u));height:calc(${apres*1.5}*var(--u));animation-timing-function:linear}`;
-        changements++;
-      }
-      const repos = w(k);
-      css += `.rail img:nth-child(${k}){--w0:${repos};--h0:${repos*1.5};`;
-      if (changements) {
-        /* keyframe 100 % EXPLICITE : sans lui, CSS interpole du dernier keyframe vers la
-           valeur de repos sur le reste du cycle — c'était la dérive mesurée. */
-        const wFin = w(k - N <= 0 ? 0 : k - N); // emplacement final du panneau en fin de cycle
-        kw += `100%{width:calc(${wFin}*var(--u));height:calc(${wFin*1.5}*var(--u))}`;
-        css += `animation:p${k} ${ANIM}}`;
-        css += `@keyframes p${k}{0%{width:calc(${repos}*var(--u));height:calc(${repos*1.5}*var(--u))}${kw}}`;
-      } else {
-        css += `animation:none}`;
-      }
-    });
-
-    /* Injection ATOMIQUE : tout s'arrête, reflow, tout repart sur le même battement.
-       (Les redémarrages partiels désynchronisaient rail et panneaux.) */
-    feuille.textContent = "";
-    scene.style.animation = "none"; rail.style.animation = "none";
-    imgs.forEach(i => i.style.animation = "none");
-    void scene.offsetWidth; // reflow
-    scene.style.animation = ""; rail.style.animation = "";
-    imgs.forEach(i => i.style.animation = "");
-    feuille.textContent = css;
+$("form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=e.target, d=Object.fromEntries(new FormData(f)), err=$("err");
+  if(d._honey) return;
+  if(!d.nom.trim()||!d.prenom.trim()||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)){
+    err.textContent="Merci d’indiquer votre nom, votre prénom et une adresse email valide."; err.hidden=false; return;
   }
-
-  /* Échelle : comme un auto layout — la zone centrale CONTIENT la frise.
-     Cartouche et liens sont linéaires en u (tout est en unités u), donc le point fixe
-     se résout exactement : u = H / (hmax + chrome/u). L'itération naïve
-     u ← dispo/hmax oscillait (le chrome grandit avec u) et laissait la frise déborder
-     aux fenêtres intermédiaires. 2 itérations de la forme exacte absorbent le seul
-     terme non linéaire (max(20u, safe-area) du nav). */
-  const entete = document.querySelector("header");
-  const liens = document.querySelector("nav");
-  const racine = document.documentElement;
-  const mq = matchMedia("(min-width: 1000px) and (orientation: landscape)");
-
-  function calerEchelle(mode){
-    const uW = innerWidth / mode.designW;
-    const H = scene.clientHeight; // = 100svh réel
-    racine.style.setProperty("--u", uW + "px");
-    for (let passe = 0; passe < 2; passe++) {
-      const u = parseFloat(getComputedStyle(racine).getPropertyValue("--u"));
-      const chrome = (entete.offsetHeight + liens.offsetHeight) / u; // en unités u
-      const uH = H / (mode.hmax + chrome);
-      racine.style.setProperty("--u", Math.min(uW, uH) + "px");
-    }
-  }
-  const applique = () => {
-    const mode = mq.matches ? DESKTOP : MOBILE;
-    construire(mode);
-    calerEchelle(mode);
+  const o=courante, btn=$("envoyer");
+  btn.disabled=true; err.hidden=true;
+  const corps={
+    "Œuvre":`n° ${o[0]} (${o[1]})`,
+    "Format":d.format, "Finition":d.finition,
+    "Nom":d.nom.trim(), "Prénom":d.prenom.trim(), "email":d.email.trim(), "Téléphone":(d.telephone||"").trim()||"—",
+    "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${d.format})`,
+    "_cc":COPIE, "_template":"table", "_captcha":"false",
+    "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${d.format}, ${d.finition.toLowerCase()}). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
   };
-  mq.addEventListener("change", applique);
-  /* resize : on ne recale QUE l'unité --u (ne redémarre aucune animation) ;
-     les keyframes ne sont reconstruits qu'au changement de mode. */
-  let raf = null;
-  addEventListener("resize", () => {
-    if (!raf) raf = requestAnimationFrame(() => {
-      raf = null;
-      calerEchelle(mq.matches ? DESKTOP : MOBILE);
-    });
-  });
-  applique();
-  /* le swap d'Inter change la hauteur du cartouche → re-caler quand la police est posée */
-  if (document.fonts && document.fonts.ready)
-    document.fonts.ready.then(() => calerEchelle(mq.matches ? DESKTOP : MOBILE));
-})();
+  try{
+    const r=await fetch("https://formsubmit.co/ajax/"+DEST,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(corps)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||String(j.success)==="false") throw new Error(j.message||r.status);
+    f.reset(); location.hash="#/merci";
+  }catch(x){
+    err.textContent="L’envoi n’a pas abouti. Réessayez, ou écrivez-nous à "+DEST+"."; err.hidden=false;
+  }finally{btn.disabled=false}
+});
 </script>
 </body>
 </html>
