@@ -161,7 +161,9 @@ const FINITIONS={
   0:{"Contrecollage dibond":[25,30,34,71],"Caisse américaine":[75,107,134,223]},
   1:{"Contrecollage dibond":[24,30,33,69],"Caisse américaine":[75,107,134,212]}};
 const eur=v=>v+" €";
-const DEST="frederic@fornini.com", COPIE="info@slikaprint.com";
+const DEST="frederic@fornini.com";
+/* Copie à Slika COUPÉE pendant les tests (FF 15/10) — remettre "info@slikaprint.com" avant la mise en ligne */
+const COPIE="";
 
 const pad=n=>String(n).padStart(2,"0");
 const $=id=>document.getElementById(id);
@@ -217,8 +219,9 @@ $("form").addEventListener("submit",async e=>{
     "Œuvre":`n° ${o[0]} (${o[1]})`,
     "Format":`${c.format} — ${c.oeuvre} €`, "Finition":c.sup?`${c.finition} — ${c.sup} €`:c.finition, "Total TTC":`${c.total} €`,
     "Nom":d.nom.trim(), "Prénom":d.prenom.trim(), "email":d.email.trim(), "Téléphone":(d.telephone||"").trim()||"—",
+    ...(COPIE?{"_cc":COPIE}:{}),
     "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${c.format})`,
-    "_cc":COPIE, "_template":"table", "_captcha":"false",
+    "_template":"table", "_captcha":"false",
     "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${c.format}, ${c.finition.toLowerCase()}, total TTC ${c.total} €). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
   };
   try{
