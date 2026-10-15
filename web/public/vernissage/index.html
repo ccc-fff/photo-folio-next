@@ -23,7 +23,7 @@
     --blur-time:250ms;                         /* durée du flou */
     --slide-delay:150ms;                       /* à l'ouverture : le fond se floute, puis le volet arrive */
   }
-  html{background:var(--paper)}
+  html{background:var(--paper);scrollbar-gutter:stable} /* le blocage du défilement ne retire pas la barre → pas de saute */
   body{font-family:"Inter V","Inter",Helvetica,Arial,sans-serif;font-weight:500;font-optical-sizing:auto;
        color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   button,input,select{font:inherit;color:inherit}
@@ -53,7 +53,7 @@
   .scrim{position:fixed;inset:0;z-index:15;display:none}
   .pnav{display:flex;justify-content:space-between;align-items:flex-start;flex:none}
   .grow{flex:1 0 0}
-  .work{padding:10px;flex:none}
+  .work{display:block;padding:10px;flex:none;cursor:pointer}
   .work img{display:block;width:100%;height:auto}
   .thumbwrap{position:absolute;top:0;right:0;padding:20px}
   .thumbwrap img{display:block;width:80px;height:auto}
@@ -118,7 +118,7 @@
     <a class="navlink t24 on" id="lien-commander" href="#/">Commander</a>
   </div>
   <div class="grow"></div>
-  <div class="work"><img id="oeuvre-img" alt=""></div>
+  <a class="work" id="lien-image" href="#/" aria-label="Commander cette œuvre"><img id="oeuvre-img" alt=""></a>
 </section>
 
 <!-- Commande -->
@@ -230,7 +230,7 @@ function route(){
   if(h[0]==="oeuvre"||h[0]==="commander"){
     const o=OEUVRES.find(x=>x[0]===+h[1]); if(!o){location.hash="#/";return}
     courante=o; const src=`/vernissage/oeuvres/${pad(o[0])}.webp`;
-    if(h[0]==="oeuvre"){ $("lien-commander").href="#/commander/"+o[0]; charge($("oeuvre-img"),src).then(()=>ouvre("p-oeuvre")); }
+    if(h[0]==="oeuvre"){ $("lien-commander").href=$("lien-image").href="#/commander/"+o[0]; charge($("oeuvre-img"),src).then(()=>ouvre("p-oeuvre")); }
     else{
       charge($("commande-img"),src); $("lien-retour-oeuvre").href="#/oeuvre/"+o[0];
       $("f-format").innerHTML=FORMATS[o[2]].map((f,i)=>`<option value="${i}">${f} - ${eur(PRIX[i])}</option>`).join("");
