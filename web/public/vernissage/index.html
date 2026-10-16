@@ -132,7 +132,7 @@
     <div class="group">
       <h2 class="t24" style="font-weight:500">Format et finitions</h2>
       <select class="field" name="format" id="f-format" aria-label="Format"></select>
-      <label class="check t18"><input type="checkbox" name="montage" id="f-montage"><span>Je souhaite un contrecollage sur dibond ou une caisse américaine. Nous vous indiquerons le tarif dans notre réponse.</span></label>
+      <label class="check t18"><input type="checkbox" name="montage" id="f-montage"><span>Je souhaite une finition en plus du tirage (contrecollage sur dibond, caisse américaine…). Nous vous recontacterons pour préciser votre demande et son tarif.</span></label>
       <p class="t18 total" id="total"></p>
     </div>
     <div class="group">
@@ -262,7 +262,7 @@ $("form").addEventListener("submit",async e=>{
   const c=choix();
   const corps={
     "Œuvre":`n° ${o[0]} (${o[1]})`,
-    "Format":`${c.format} — ${c.oeuvre} € TTC`, "Finition":c.montage?"Souhaite un contrecollage dibond ou une caisse américaine — tarif à communiquer":"Tirage seul",
+    "Format":`${c.format} — ${c.oeuvre} € TTC`, "Finition":c.montage?"Souhaite une finition (contrecollage dibond, caisse américaine…) — à recontacter":"Tirage seul",
     "Nom":d.nom.trim(), "Prénom":d.prenom.trim(), "email":d.email.trim(), "Téléphone":(d.telephone||"").trim()||"—",
     ...(COPIE?{"_cc":COPIE}:{}),
     "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${c.format})`,
