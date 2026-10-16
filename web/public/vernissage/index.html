@@ -69,6 +69,8 @@
   .btn{display:flex;justify-content:flex-end;align-items:center;width:100%;height:62px;padding:20px;border:0;border-radius:4px;
        background:var(--ink);color:var(--paper);font-size:18px;font-weight:500;cursor:pointer}
   .btn[disabled]{opacity:.5;cursor:wait}
+  .check{display:flex;gap:10px;align-items:flex-start;line-height:1.25;cursor:pointer;text-box:none}
+  .check input{flex:none;width:18px;height:18px;margin-top:2px;accent-color:var(--ink)}
   .err{color:#b00;font-size:15px;line-height:1.3}
   .infos{display:flex;flex-direction:column;gap:40px;padding:20px;flex:none}
   .infos p{line-height:1.22}
@@ -130,7 +132,7 @@
     <div class="group">
       <h2 class="t24" style="font-weight:500">Format et finitions</h2>
       <select class="field" name="format" id="f-format" aria-label="Format"></select>
-      <select class="field" name="finition" id="f-finition" aria-label="Finition"></select>
+      <label class="check t18"><input type="checkbox" name="montage" id="f-montage"><span>Je souhaite un contrecollage sur dibond ou une caisse américaine. Nous vous indiquerons le tarif dans notre réponse.</span></label>
       <p class="t18 total" id="total"></p>
     </div>
     <div class="group">
@@ -181,14 +183,9 @@
 /* n°, fichier, 1 = format 3:4 */
 const OEUVRES=[[1,"_DSF6107",0],[2,"_DSF3192",0],[3,"DSCF1894",0],[4,"_DSF3420",0],[5,"_DSF1650",1],[6,"_DSF2968",0],[7,"_DSF8473",0],[8,"_DSF9375",0],[9,"_DSF1769",0],[10,"_DSF0572",0],[11,"DSCF2155",0],[12,"_DSF7995",0],[13,"_DSF6090",0],[14,"_DSF3396",0],[15,"_DSF1723",1],[16,"_DSF6297",0],[17,"_DSF4565",0],[18,"_DSF0444",0],[19,"_DSF2554",0],[20,"_DSF2674",0],[21,"_DSF6133",0],[22,"DSCF2147",0],[23,"_DSF5495",0],[24,"DSCF6750",0],[25,"DSCF6755",0],[26,"_DSF0849 1",1],[27,"_DSF3132",0],[28,"_DSF3514",0],[29,"_DSF0158 1",0],[30,"_DSF2224",0],[31,"DSCF2752",0],[32,"_DSF4183",0],[33,"_DSF8425",0],[34,"DSCF6752",0],[35,"_DSF2101",1],[36,"_DSF5076",0],[37,"_DSF0179 1",0],[38,"_DSF1485",0],[39,"_DSF4906",0],[40,"_DSF8094",0],[41,"_DSF8867",0],[42,"_DSF3216",0],[43,"_DSF0196 2",0],[44,"DSCF6612",0],[45,"_DSF6108",0],[46,"DSCF6621",0],[47,"_DSF6093",0],[48,"_DSF2674",1],[49,"_DSF0167",0],[50,"_DSF6088",0],[51,"_DSF5480",0],[52,"DSCF2149",0],[53,"_DSF5465 2",0],[54,"_DSF5184",0],[55,"_DSF4509",0],[56,"_DSF3224",0]];
 /* Même prix pour l'équivalent 3:4 de chaque format (décision FF 15/10) — formats 3:4 = grille Slika, même largeur */
-const FORMATS={0:["20 × 30","30 × 45","40 × 60","60 × 90"],1:["20 × 27","30 × 40","40 × 53","60 × 80"]};
+const FORMATS={0:["20 × 30","30 × 45","40 × 60","60 × 90"],1:["20 × 27","30 × 40","45 × 60","60 × 80"]};
 const PRIX=[150,210,320,520];
-/* Finitions refacturées à prix coûtant = tarifs publics Slika TTC (slikaprint.com/tarifs, relevé 15/10), arrondis à l'euro.
-   Dibond 2 mm. Caisse américaine = caisse + contrecollage dibond 2 mm + montage. 3:4 : grille 4:3 de Slika ;
-   caisse 20×27 / 30×40 / 40×53 absente de leur grille → prix du format 2:3 équivalent (provisoire). */
-const FINITIONS={
-  0:{"Contrecollage dibond":[25,30,34,71],"Caisse américaine":[75,107,134,223]},
-  1:{"Contrecollage dibond":[24,30,33,69],"Caisse américaine":[75,107,134,212]}};
+/* Finitions : plus de prix en ligne (FF 16/10) — case à cocher, tarif communiqué dans la réponse */
 const eur=v=>v+" €";
 const DEST="frederic@fornini.com";
 /* Copie à Slika : réactivée sur GO de FF le 16/10 (tests validés) */
@@ -240,21 +237,17 @@ function route(){
   else if(h[0]==="merci") ouvre("p-merci");
   else ouvre(null);
 }
-/* Sélection courante → libellés, prix, total TTC */
+/* Sélection courante → libellés et prix TTC de l'œuvre */
 function choix(){
-  const o=courante, i=+$("f-format").value||0, fin=$("f-finition").value||"Tirage seul";
-  const sup=fin==="Tirage seul"?0:FINITIONS[o[2]][fin][i];
-  return {format:`${FORMATS[o[2]][i]} cm`, oeuvre:PRIX[i], finition:fin, sup, total:PRIX[i]+sup};
+  const o=courante, i=+$("f-format").value||0, m=$("f-montage").checked;
+  return {format:`${FORMATS[o[2]][i]} cm`, oeuvre:PRIX[i], montage:m};
 }
 function finitions(){
-  const o=courante, i=+$("f-format").value||0, sel=$("f-finition"), avant=sel.value;
-  sel.innerHTML=`<option>Tirage seul</option>`+Object.entries(FINITIONS[o[2]]).map(([k,v])=>`<option value="${k}">${k} + ${eur(v[i])}</option>`).join("");
-  if(avant) sel.value=avant; if(!sel.value) sel.value="Tirage seul";
   const c=choix();
-  $("total").textContent=c.sup?`Total TTC : ${eur(c.total)} (œuvre ${eur(c.oeuvre)} + ${c.finition.toLowerCase()} ${eur(c.sup)})`:`Total TTC : ${eur(c.total)}`;
+  $("total").textContent=`Prix TTC : ${eur(c.oeuvre)}`+(c.montage?" + finition (tarif communiqué dans notre réponse)":"");
 }
 $("f-format").addEventListener("change",finitions);
-$("f-finition").addEventListener("change",finitions);
+$("f-montage").addEventListener("change",finitions);
 addEventListener("hashchange",route); route();
 
 $("form").addEventListener("submit",async e=>{
@@ -269,12 +262,12 @@ $("form").addEventListener("submit",async e=>{
   const c=choix();
   const corps={
     "Œuvre":`n° ${o[0]} (${o[1]})`,
-    "Format":`${c.format} — ${c.oeuvre} €`, "Finition":c.sup?`${c.finition} — ${c.sup} €`:c.finition, "Total TTC":`${c.total} €`,
+    "Format":`${c.format} — ${c.oeuvre} € TTC`, "Finition":c.montage?"Souhaite un contrecollage dibond ou une caisse américaine — tarif à communiquer":"Tirage seul",
     "Nom":d.nom.trim(), "Prénom":d.prenom.trim(), "email":d.email.trim(), "Téléphone":(d.telephone||"").trim()||"—",
     ...(COPIE?{"_cc":COPIE}:{}),
     "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${c.format})`,
     "_template":"table", "_captcha":"false",
-    "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${c.format}, ${c.finition.toLowerCase()}, total TTC ${c.total} €). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
+    "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${c.format}, ${c.oeuvre} € TTC${c.montage?", avec une finition dont nous vous indiquerons le tarif":""}). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
   };
   try{
     const r=await fetch("https://formsubmit.co/ajax/"+DEST,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(corps)});
