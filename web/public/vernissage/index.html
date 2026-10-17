@@ -191,8 +191,8 @@ const PRIX=[150,210,320,520];
 /* Finitions : plus de prix en ligne (FF 16/10) — case à cocher, tarif communiqué dans la réponse */
 const eur=v=>v+" €";
 const DEST="frederic@fornini.com";
-/* Copie à Slika : réactivée sur GO de FF le 16/10 (tests validés) */
-const COPIE="info@slikaprint.com";
+/* Envoi : fonction Brevo (~/Code/vernissage-api). La copie à Slika se règle côté fonction (variable COPIE dans Vercel). */
+const API="https://vernissage-api.vercel.app/api/commande";
 
 const pad=n=>String(n).padStart(2,"0");
 const $=id=>document.getElementById(id);
@@ -262,19 +262,12 @@ $("form").addEventListener("submit",async e=>{
   const o=courante, btn=$("envoyer");
   btn.disabled=true; err.hidden=true;
   const c=choix();
-  const corps={
-    "Œuvre":`n° ${o[0]} (${o[1]})`,
-    "Format":`${c.format} — ${c.oeuvre} € TTC`, "Finition":c.montage?"Souhaite une finition (contrecollage dibond, caisse américaine…) — à recontacter":"Tirage seul",
-    "Nom":d.nom.trim(), "Prénom":d.prenom.trim(), "email":d.email.trim(), "Téléphone":(d.telephone||"").trim()||"—",
-    ...(COPIE?{"_cc":COPIE}:{}),
-    "_subject":`Entrailles — demande pour l’œuvre n° ${o[0]} (${c.format})`,
-    "_template":"table", "_captcha":"false",
-    "_autoresponse":`Bonjour ${d.prenom.trim()},\n\nNous avons bien reçu votre demande pour l’œuvre n° ${o[0]} d’Entrailles (${c.format}, ${c.oeuvre} € TTC${c.montage?", avec une finition dont nous vous indiquerons le tarif":""}). Nous revenons vers vous sous 24 heures.\n\nFrédéric Fornini — Slika slowprint, 32 rue Gabrielle, Paris 18e`
-  };
+  const corps={n:o[0], fichier:o[1], format:c.format, prix:c.oeuvre, finition:c.montage,
+    nom:d.nom.trim(), prenom:d.prenom.trim(), email:d.email.trim(), telephone:(d.telephone||"").trim(), _honey:d._honey||""};
   try{
-    const r=await fetch("https://formsubmit.co/ajax/"+DEST,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(corps)});
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(corps)});
     const j=await r.json().catch(()=>({}));
-    if(!r.ok||String(j.success)==="false") throw new Error(j.message||r.status);
+    if(!r.ok||!j.ok) throw new Error(j.reason||r.status);
     f.reset(); location.hash="#/merci";
   }catch(x){
     err.textContent="L’envoi n’a pas abouti. Réessayez, ou écrivez-nous à "+DEST+"."; err.hidden=false;
