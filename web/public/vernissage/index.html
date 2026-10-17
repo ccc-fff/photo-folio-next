@@ -57,7 +57,7 @@
   .work img{display:block;width:100%;height:auto}
   .thumbwrap{position:absolute;top:0;right:0;padding:20px}
   .thumbwrap img{display:block;width:80px;height:auto}
-  .form{display:flex;flex-direction:column;gap:40px;padding:10px;flex:none}
+  .form{display:flex;flex-direction:column;gap:20px;padding:10px;flex:none}
   .group{display:flex;flex-direction:column;gap:10px}
   .field{display:block;width:100%;height:35px;border:1px solid var(--ink);border-radius:4px;background:var(--paper);
          padding:0 20px;font-size:18px;font-weight:500;line-height:33px;outline:none;-webkit-appearance:none;appearance:none}
@@ -69,8 +69,11 @@
   .btn{display:flex;justify-content:flex-end;align-items:center;width:100%;height:62px;padding:20px;border:0;border-radius:4px;
        background:var(--ink);color:var(--paper);font-size:18px;font-weight:500;cursor:pointer}
   .btn[disabled]{opacity:.5;cursor:wait}
-  .check{display:flex;gap:10px;align-items:flex-start;line-height:1.25;cursor:pointer;text-box:none}
-  .check input{flex:none;width:18px;height:18px;margin-top:2px;accent-color:var(--ink)}
+  .check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+  .check span{line-height:normal;text-box:trim-both cap alphabetic}
+  .check input{flex:none;-webkit-appearance:none;appearance:none;width:18px;height:18px;margin:0;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);cursor:pointer}
+  .check input:checked{background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M4 9.5l3.5 3.5 6.5-7.5' fill='none' stroke='%23fff' stroke-width='1.8'/%3E%3C/svg%3E") center/18px 18px no-repeat}
+  .check input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   .err{color:#b00;font-size:15px;line-height:1.3}
   .infos{display:flex;flex-direction:column;gap:40px;padding:20px;flex:none}
   .infos p{line-height:1.22}
@@ -84,6 +87,7 @@
 
   @media (min-width:900px){
     .gallery{grid-template-columns:repeat(6,1fr)}
+    .form{gap:40px}
     /* Volet : glisse depuis la droite ; fermé = hors champ */
     .panel{left:auto;width:var(--panel);opacity:1;transform:translateX(100%);
            transition:transform var(--slide) var(--slide-ease),visibility 0s linear var(--slide)}
@@ -133,7 +137,6 @@
       <h2 class="t24" style="font-weight:500">Format et finitions</h2>
       <select class="field" name="format" id="f-format" aria-label="Format"></select>
       <label class="check t18"><input type="checkbox" name="montage" id="f-montage"><span>Je souhaite une finition en plus du tirage (contrecollage sur dibond, caisse américaine…). Nous vous recontacterons pour préciser votre demande et son tarif.</span></label>
-      <p class="t18 total" id="total"></p>
     </div>
     <div class="group">
       <h2 class="t24" style="font-weight:500">Coordonnées</h2>
@@ -244,7 +247,6 @@ function choix(){
 }
 function finitions(){
   const c=choix();
-  $("total").textContent=`Prix TTC : ${eur(c.oeuvre)}`+(c.montage?" + finition (tarif communiqué dans notre réponse)":"");
 }
 $("f-format").addEventListener("change",finitions);
 $("f-montage").addEventListener("change",finitions);
