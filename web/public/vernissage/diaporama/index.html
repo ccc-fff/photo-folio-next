@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Entrailles">
+<meta name="theme-color" content="#000000">
+<title>Entrailles — diaporama</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  body{font-family:Helvetica,Arial,sans-serif;color:#fff;cursor:none}
+  .slide{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    opacity:0;transition:opacity 1.2s ease}
+  .slide.on{opacity:1}
+  .slide img{max-width:92vw;max-height:92vh;width:auto;height:auto;object-fit:contain;display:block}
+  #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    background:#000;z-index:10;cursor:pointer;text-align:center}
+  #start b{font-size:28px;font-weight:600;letter-spacing:.02em}
+  #start span{font-size:15px;opacity:.6}
+  #pause{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
+    font-size:13px;letter-spacing:.08em;opacity:0;transition:opacity .4s;z-index:5}
+  #pause.on{opacity:.55}
+</style>
+</head>
+<body>
+<div id="start"><b>Entrailles</b><span>Toucher pour lancer le diaporama</span></div>
+<div id="a" class="slide"><img alt=""></div>
+<div id="b" class="slide"><img alt=""></div>
+<div id="pause">PAUSE</div>
+<script>
+// 56 œuvres de l'exposition, dans l'ordre de /vernissage (oeuvres/01.webp … 56.webp).
+// Réglages par l'URL : ?d=8 (secondes par image), ?n=12 (commencer à l'œuvre 12).
+const N = 56;
+const q = new URLSearchParams(location.search);
+const D = Math.max(2, Number(q.get('d')) || 6) * 1000;
+let i = Math.min(N, Math.max(1, Number(q.get('n')) || 1)) - 1;
+const src = k => '/vernissage/oeuvres/' + String(k + 1).padStart(2, '0') + '.webp';
+const slides = [document.getElementById('a'), document.getElementById('b')];
+let cur = 0, timer = null, paused = false, lock = null;
+
+function preload(k) { const im = new Image(); im.src = src((k + N) % N); }
+
+function show(k) {
+  i = (k + N) % N;
+  const next = slides[1 - cur], img = next.querySelector('img');
+  const go = () => { next.classList.add('on'); slides[cur].classList.remove('on'); cur = 1 - cur; preload(i + 1); };
+  img.onload = go; img.onerror = go;
+  img.src = src(i);
+}
+
+function schedule() { clearInterval(timer); if (!paused) timer = setInterval(() => show(i + 1), D); }
+
+async function keepAwake() {
+  try { if ('wakeLock' in navigator) lock = await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !document.getElementById('start').isConnected) keepAwake(); });
+
+function start() {
+  const el = document.documentElement;
+  const fs = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (fs) { try { fs.call(el); } catch (e) {} }
+  keepAwake();
+  document.getElementById('start').remove();
+  show(i); schedule();
+}
+document.getElementById('start').addEventListener('click', start);
+
+// Toucher = pause / reprise ; balayage horizontal = image suivante / précédente.
+let x0 = null;
+addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, {passive: true});
+addEventListener('touchend', e => {
+  if (x0 === null || document.getElementById('start')) return;
+  const dx = e.changedTouches[0].clientX - x0; x0 = null;
+  if (Math.abs(dx) > 50) { show(i + (dx < 0 ? 1 : -1)); schedule(); return; }
+  paused = !paused; document.getElementById('pause').classList.toggle('on', paused); schedule();
+});
+addEventListener('keydown', e => {
+  if (document.getElementById('start')) return start();
+  if (e.key === 'ArrowRight') { show(i + 1); schedule(); }
+  if (e.key === 'ArrowLeft') { show(i - 1); schedule(); }
+  if (e.key === ' ') { paused = !paused; document.getElementById('pause').classList.toggle('on', paused); schedule(); }
+});
+preload(i);
+</script>
+</body>
+</html>
