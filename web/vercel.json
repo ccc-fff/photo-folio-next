@@ -12,5 +12,17 @@
       "source": "/stats/api/send",
       "destination": "https://umami-frederic-forninis-projects.vercel.app/api/send"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/vernissage/invitation",
+      "destination": "/vernissage/exposition",
+      "permanent": false
+    },
+    {
+      "source": "/vernissage/invitation/",
+      "destination": "/vernissage/exposition",
+      "permanent": false
+    }
   ]
 }
