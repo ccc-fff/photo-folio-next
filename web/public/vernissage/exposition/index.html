@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Entrailles — Frédéric Fornini chez Slika slowprint</title>
-<meta name="description" content="Exposition Entrailles de Frédéric Fornini chez Slika slowprint, 32 rue Gabrielle, Paris 18ᵉ. Du 16 au 31 octobre 2026. Entrée libre.">
+<meta name="description" content="Exposition Entrailles de Frédéric Fornini chez Slika slowprint, 32 rue Gabrielle, Paris 18ᵉ. Du 16 octobre au 7 novembre 2026. Entrée libre.">
 <meta property="og:title" content="Entrailles — Frédéric Fornini chez Slika slowprint">
-<meta property="og:description" content="Exposition du 16 au 31 octobre · 32 rue Gabrielle, Paris 18ᵉ · Entrée libre">
+<meta property="og:description" content="Exposition du 16 octobre au 7 novembre · 32 rue Gabrielle, Paris 18ᵉ · Entrée libre">
 <meta property="og:image" content="https://fredericfornini.com/vernissage/s1.jpg">
 <style>
   @font-face{
@@ -17,7 +17,7 @@
     font-display:swap;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{ --u: calc(100vw / 1080); --ink:#111; } /* valeur de départ, recalée par le script (clamp hauteur) */
+  :root{ --u: calc(100vw / 1080); --t: var(--u); --ink:#111; } /* --u = frise ; --t = texte et marges (fixe en desktop) */ /* valeur de départ, recalée par le script (clamp hauteur) */
   html,body{height:100%}
   body{font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:#b8c7de;
        -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale} /* aligne le rendu macOS sur Figma */
@@ -26,30 +26,30 @@
   .scene{height:100svh;display:flex;flex-direction:column;justify-content:space-between;
          overflow:hidden;background:#b8c7de;}
   header{display:flex;justify-content:space-between;align-items:flex-start;
-         padding: calc(20*var(--u)) calc(20*var(--u)) 0;}
+         padding: calc(20*var(--t)) calc(20*var(--t)) calc(var(--esp)*var(--t));} /* --esp = marges Infos + Slideshow de la maquette */
   /* Typo = calques Figma : Inter SemiBold, approche 0 ; corps/interligne/colonne par mode (variables du script) */
-  .cartouche{font-weight:600;font-size:calc(var(--fs)*var(--u));line-height:calc(var(--lh)*var(--u))}
+  .cartouche{font-weight:600;font-size:calc(var(--fs)*var(--t));line-height:calc(var(--lh)*var(--t))}
   .cartouche .l{display:flex}
   /* padding DANS la colonne (border-box) : la valeur reste à --col quand le libellé tient ;
      garde une respiration quand le rendu navigateur déborde la colonne de la maquette
      (« Vernissage » : 293,3 u mesurés pour une colonne de 292 — Inter rend ~1 % plus large que Figma) */
-  .cartouche .l span:first-child{min-width:calc(var(--col)*var(--u));padding-right:.25em}
-  header img{height:calc(var(--logo)*var(--u));width:auto;display:block}
+  .cartouche .l span:first-child{min-width:calc(var(--col)*var(--t));padding-right:.25em}
+  header img{height:calc(var(--logo)*var(--t));width:auto;display:block}
   .slika-lien{color:inherit;text-decoration:none}
 
   /* ---- Frise ---- */
   .fenetre{flex:1;display:flex;align-items:center;min-height:0}
   .rail{display:flex;align-items:flex-start;gap:calc(20*var(--u));
-        padding-left:calc(20*var(--u));
+        padding-left:calc(20*var(--t));
         height:calc(var(--hmax)*var(--u));
         will-change:transform;}
   .rail img{--w0:600;--h0:900;display:block;object-fit:cover;flex:none;
             width:calc(var(--w0)*var(--u));height:calc(var(--h0)*var(--u));}
 
   /* ---- Liens ---- */
-  nav{padding: 0 calc(20*var(--u)) calc(max(20*var(--u), env(safe-area-inset-bottom))) }
-  nav a{display:table;color:var(--ink);font-weight:600;font-size:calc(var(--fs)*var(--u));
-        line-height:calc(var(--lh)*var(--u));text-decoration:underline;text-underline-offset:.14em}
+  nav{padding: calc(var(--esp)*var(--t)) calc(20*var(--t)) calc(max(20*var(--t), env(safe-area-inset-bottom))) }
+  nav a{display:table;color:var(--ink);font-weight:600;font-size:calc(var(--fs)*var(--t));
+        line-height:calc(var(--lh)*var(--t));text-decoration:underline;text-underline-offset:.14em}
 
   /* ---- Sous le pli ---- */
   @media (prefers-reduced-motion: reduce){
@@ -64,7 +64,7 @@
     <div class="cartouche">
       <div>Frédéric Fornini</div>
       <div>Entrailles</div>
-      <div class="l"><span>Exposition</span><span>16.10&nbsp;→&nbsp;31.10.26</span></div>
+      <div class="l"><span>Exposition</span><span>16.10&nbsp;→&nbsp;07.11.26</span></div>
       <div><a class="slika-lien" href="https://www.slikaprint.com/expositions/" target="_blank" rel="noopener">Slika</a></div>
       <div>32 rue Gabrielle, 75018 Paris</div>
     </div>
@@ -106,12 +106,12 @@
 
   const MOBILE = {   // fenêtre deux-pleines (frame 1795:738)
     actif: 720, sortie: 600, hmax: 1080, designW: 1080,
-    fs: 54, lh: 59, col: 292, logo: 72,
+    fs: 54, lh: 59, col: 292, logo: 72, esp: 40, // 20 (Infos) + 20 (Slideshow)
     wSlot: s => s <= 0 ? 600 : (s <= 2 ? 720 : 600)
   };
   const DESKTOP = {  // cascade par emplacement (frame 1796:82)
     actif: 450, sortie: 400, hmax: 675, designW: 1680,
-    fs: 32, lh: 35, col: 171, logo: 80,
+    fs: 32, lh: 35, col: 171, logo: 80, esp: 35, // 20 (Infos) + 15 (Slideshow)
     wSlot: s => s <= 0 ? 400 : [450,400,360,330,301,289,284][Math.min(s,7)-1]
   };
 
@@ -142,7 +142,7 @@
       kf += `${pc(tFin(i))}{transform:translateX(calc(${-pitch*i}*var(--u)));animation-timing-function:linear}`;
     }
     css += `@keyframes rail{${kf}} .rail{animation:rail ${ANIM};--hmax:${mode.hmax}}`;
-    css += `:root{--fs:${mode.fs};--lh:${mode.lh};--col:${mode.col};--logo:${mode.logo}}`;
+    css += `:root{--fs:${mode.fs};--lh:${mode.lh};--col:${mode.col};--logo:${mode.logo};--esp:${mode.esp}}`;
 
     // panneaux : escalier de tailles (emplacement k - pas i)
     imgs.forEach((img, idx) => {
@@ -193,8 +193,17 @@
   const mq = matchMedia("(min-width: 1000px) and (orientation: landscape)");
 
   function calerEchelle(mode){
-    const uW = innerWidth / mode.designW;
     const H = scene.clientHeight; // = 100svh réel
+    if (mode === DESKTOP) {
+      /* Desktop : texte à sa taille de maquette (--t = 1px, ne diminue pas avant le
+         breakpoint) ; la frise remplit la hauteur restante, indépendamment de la largeur. */
+      racine.style.setProperty("--t", "1px");
+      const chrome = entete.offsetHeight + liens.offsetHeight; // px, ne dépend pas de --u
+      racine.style.setProperty("--u", Math.max(0, (H - chrome) / mode.hmax) + "px");
+      return;
+    }
+    racine.style.removeProperty("--t"); // mobile : --t suit --u
+    const uW = innerWidth / mode.designW;
     racine.style.setProperty("--u", uW + "px");
     for (let passe = 0; passe < 2; passe++) {
       const u = parseFloat(getComputedStyle(racine).getPropertyValue("--u"));

@@ -18,17 +18,12 @@
     opacity:0;transition:opacity 1.2s ease}
   .slide.on{opacity:1}
   .slide img{max-width:92vw;max-height:92vh;width:auto;height:auto;object-fit:contain;display:block}
-  #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-    background:#000;z-index:10;cursor:pointer;text-align:center}
-  #start b{font-size:28px;font-weight:600;letter-spacing:.02em}
-  #start span{font-size:15px;opacity:.6}
   #pause{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
     font-size:13px;letter-spacing:.08em;opacity:0;transition:opacity .4s;z-index:5}
   #pause.on{opacity:.55}
 </style>
 </head>
 <body>
-<div id="start"><b>Entrailles</b><span>Toucher pour lancer le diaporama</span></div>
 <div id="a" class="slide"><img alt=""></div>
 <div id="b" class="slide"><img alt=""></div>
 <div id="pause">PAUSE</div>
@@ -58,34 +53,41 @@ function schedule() { clearInterval(timer); if (!paused) timer = setInterval(() 
 async function keepAwake() {
   try { if ('wakeLock' in navigator) lock = await navigator.wakeLock.request('screen'); } catch (e) {}
 }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !document.getElementById('start').isConnected) keepAwake(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
 
-function start() {
+// Lancement dès l'ouverture. Le plein écran exige un geste de l'utilisateur :
+// le premier toucher (ou la première touche) le demande, sans mettre en pause.
+let fsDone = false;
+function fullscreenOnce() {
+  if (fsDone) return false;
+  fsDone = true;
   const el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return false;
   const fs = el.requestFullscreen || el.webkitRequestFullscreen;
-  if (fs) { try { fs.call(el); } catch (e) {} }
+  if (!fs) return false;
+  try { fs.call(el); } catch (e) { return false; }
   keepAwake();
-  document.getElementById('start').remove();
-  show(i); schedule();
+  return true;
 }
-document.getElementById('start').addEventListener('click', start);
 
 // Toucher = pause / reprise ; balayage horizontal = image suivante / précédente.
 let x0 = null;
 addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, {passive: true});
 addEventListener('touchend', e => {
-  if (x0 === null || document.getElementById('start')) return;
+  if (x0 === null) return;
   const dx = e.changedTouches[0].clientX - x0; x0 = null;
-  if (Math.abs(dx) > 50) { show(i + (dx < 0 ? 1 : -1)); schedule(); return; }
+  if (Math.abs(dx) > 50) { fullscreenOnce(); show(i + (dx < 0 ? 1 : -1)); schedule(); return; }
+  if (fullscreenOnce()) return;
   paused = !paused; document.getElementById('pause').classList.toggle('on', paused); schedule();
 });
 addEventListener('keydown', e => {
-  if (document.getElementById('start')) return start();
+  fullscreenOnce();
   if (e.key === 'ArrowRight') { show(i + 1); schedule(); }
   if (e.key === 'ArrowLeft') { show(i - 1); schedule(); }
   if (e.key === ' ') { paused = !paused; document.getElementById('pause').classList.toggle('on', paused); schedule(); }
 });
-preload(i);
+keepAwake();
+show(i); schedule();
 </script>
 </body>
 </html>

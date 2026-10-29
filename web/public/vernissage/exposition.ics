@@ -22,13 +22,14 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:exposition-entrailles-20261016@fredericfornini.com
-DTSTAMP:20261023T120000Z
+DTSTAMP:20261026T120000Z
 DTSTART;VALUE=DATE:20261016
-DTEND;VALUE=DATE:20261101
+DTEND;VALUE=DATE:20261108
 SUMMARY:Exposition — Entrailles\, Frédéric Fornini
 LOCATION:Slika slowprint\, 32 rue Gabrielle\, 75018 Paris
-DESCRIPTION:Exposition Entrailles de Frédéric Fornini\, du 16 au 31 octobre
-  2026 — entrée libre\, le week-end 14 h – 19 h et sur demande en semaine.
+DESCRIPTION:Exposition Entrailles de Frédéric Fornini\, du 16 octobre
+  au 7 novembre 2026 — entrée libre\, le week-end 14 h – 19 h
+  et sur demande en semaine.
  \nhttps://fredericfornini.com/vernissage/exposition
 URL:https://fredericfornini.com/vernissage/exposition
 END:VEVENT
