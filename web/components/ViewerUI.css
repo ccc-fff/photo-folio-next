@@ -236,6 +236,8 @@ a.viewer-credit-name:hover {
     top: 80px;
     left: 0;
     right: 0;
+    /* annule le centrage desktop (translateX(-50%)) : sinon le panneau sort d'une demi-largeur à gauche */
+    transform: none;
     height: calc(var(--vh, 1vh) * 100 - 80px);
     height: calc(100dvh - 80px);
     padding: var(--margin-mobile);
