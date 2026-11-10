@@ -3,11 +3,11 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { generateGrid, GRID_CONFIG } from '@/utils/gridGenerator'
-import { useGridVirtualization } from '@/hooks/useGridVirtualization'
+import { useGridVirtualization, type PositionedBlock } from '@/hooks/useGridVirtualization'
 import { useDrag } from '@/hooks/useDrag'
 import { useSequencer, INITIAL_STATE, type SequencerState } from '@/hooks/useSequencer'
 import { useI18n } from '@/lib/i18n'
-import { filterTrulyVisibleBlocks, getBlockRanksByDistance, getBlockCenter, getDistance } from '@/hooks/useProximity'
+import { filterTrulyVisibleBlocks, getBlockRanksByDistance } from '@/hooks/useProximity'
 import { MOTION_CONFIG } from '@/config/motion'
 import { getTextColor } from '@/utils/colorUtils'
 import { buildViewerData, type ViewerData } from '@/lib/viewerData'
@@ -20,16 +20,11 @@ const Menu = dynamic(() => import('./Menu'))
 import './Grid.css'
 import type { Series, GridImage, About } from '@/lib/data'
 
-// Type pour titre localisé
-type LocalizedString = { fr: string; en: string } | string
-
 interface GridProps {
   series: Series[]
   images: GridImage[]
   about: About | null
   defaultBackgroundColor?: string
-  initialOpenSlug?: string
-  initialOpenIndex?: number
   initialViewerData?: ViewerData | null
 }
 
@@ -38,7 +33,6 @@ export default function Grid({
   images,
   about,
   defaultBackgroundColor = '#070707',
-  initialOpenSlug,
   initialViewerData
 }: GridProps) {
   // État initial du sequencer : viewer ouvert d'emblée si arrivée directe sur /[slug]
@@ -57,14 +51,7 @@ export default function Grid({
   }, [])
 
   const { state, play, set } = useSequencer(dynamicInitial)
-  const { t } = useI18n()
-
-  // Helper pour extraire un titre localisé
-  const getTitle = (title: LocalizedString | undefined): string => {
-    if (!title) return ''
-    if (typeof title === 'string') return title
-    return t(title) || title.fr || ''
-  }
+  const { title } = useI18n()
 
   const [hoveredImage, setHoveredImage] = useState<{
     seriesTitle: string
@@ -96,17 +83,6 @@ export default function Grid({
     }
   }, [])
 
-  // Fix hauteur mobile (100vh inclut la barre d'URL sur iOS/Android)
-  useEffect(() => {
-    const setVh = () => {
-      const vh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--vh', `${vh}px`)
-    }
-    setVh()
-    window.addEventListener('resize', setVh)
-    return () => window.removeEventListener('resize', setVh)
-  }, [])
-
   // Précharge les chunks Viewer + ViewerUI en idle après chargement complet
   // de la page, pour que le 1er clic image n'attende pas le download du chunk.
   useEffect(() => {
@@ -134,9 +110,32 @@ export default function Grid({
     return generateGrid({ images })
   }, [images])
 
-  const { grid, GRID_WIDTH, GRID_HEIGHT, GALLERY_GRID } = gridConfig
+  const { GRID_WIDTH, GRID_HEIGHT, GALLERY_GRID } = gridConfig
 
-  const { visibleBlocks, containerRef: virtualizationRef, zoneSize, isReady, handleDrag, scrollToSeries, getReferencePoint, isMobile } = useGridVirtualization(
+  // Vignette active (sous la souris en desktop, au centre en mobile) : envoyée par
+  // la boucle du mur seulement quand elle change. Ignorée pendant le menu.
+  const menuOpenRef = useRef(state.menu)
+  useEffect(() => {
+    menuOpenRef.current = state.menu
+  }, [state.menu])
+
+  const handleActiveBlockChange = useCallback((block: PositionedBlock | null) => {
+    if (menuOpenRef.current) return
+    if (block) {
+      const { image } = block
+      setHoveredImage({
+        seriesTitle: title(image.seriesTitle),
+        indexInSeries: image.indexInSeries,
+        totalInSeries: image.totalInSeries
+      })
+      setHoveredBgColor(image.backgroundColor || null)
+    } else {
+      setHoveredImage(null)
+      setHoveredBgColor(null)
+    }
+  }, [title])
+
+  const { blocks, registerBlock, getBlocks, refreshActiveBlock, containerRef: virtualizationRef, isReady, handleDrag, scrollToSeries, isMobile } = useGridVirtualization(
     gridConfig,
     {
       GRID_WIDTH,
@@ -144,32 +143,46 @@ export default function Grid({
       GALLERY_GRID,
       ...GRID_CONFIG,
       motionMode: state.motion
-    }
+    },
+    { onActiveBlockChange: handleActiveBlockChange }
   )
+
+  // Menu refermé : la vignette active a pu changer pendant qu'il était ouvert
+  useEffect(() => {
+    if (!state.menu) refreshActiveBlock()
+  }, [state.menu, refreshActiveBlock])
+
+  // Ordre de disparition / réapparition des vignettes autour d'un point (clic,
+  // souris ou centre de l'écran) : mémorise les rangs lus par GridBlock et
+  // renvoie la durée totale de la vague. Seul endroit où ce calcul est fait.
+  const prepareStagger = useCallback((origin: { x: number; y: number }) => {
+    const trulyVisible = filterTrulyVisibleBlocks(getBlocks(), window.innerWidth, window.innerHeight)
+    const ranks = getBlockRanksByDistance(trulyVisible, origin)
+    staggerRef.current = { ranks, origin }
+    return (trulyVisible.length - 1) * MOTION_CONFIG.STAGGER_OFFSET + MOTION_CONFIG.STAGGER_ITEM_FADE
+  }, [getBlocks])
+
+  // Point de départ de la vague à la fermeture : la souris si elle est sur la page, sinon le centre.
+  const pointerOrCenter = () => {
+    const p = mousePositionRef.current
+    return p.x >= 0 ? p : { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+  }
 
   const hasInitialAnimated = useRef(false)
   const initialVisibleKeysRef = useRef(new Set<string>())
 
   useEffect(() => {
-    if (!isReady || hasInitialAnimated.current || visibleBlocks.length === 0) return
+    if (!isReady || hasInitialAnimated.current || blocks.length === 0) return
     if (state.grid !== 'initial-hidden') return
 
     hasInitialAnimated.current = true
 
-    const centerPoint = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-    const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
-    const ranks = getBlockRanksByDistance(trulyVisible, centerPoint)
-    staggerRef.current = { ranks, origin: centerPoint }
-
-    trulyVisible.forEach(block => {
-      initialVisibleKeysRef.current.add(block.key)
-    })
-
-    const maxRank = trulyVisible.length - 1
-    const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
+    const staggerDuration = prepareStagger({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
+    // Les vignettes de la première vague sont celles visibles au premier affichage
+    staggerRef.current.ranks?.forEach((_, key) => initialVisibleKeysRef.current.add(key))
 
     play('initial-load', { staggerDuration })
-  }, [isReady, visibleBlocks, state.grid, play])
+  }, [isReady, blocks, state.grid, play, prepareStagger])
 
   // Arrivée directe sur /[slug] : déclencher l'apparition du viewer (fade in)
   // sans rejouer la séquence d'ouverture qui suppose une grille visible au départ.
@@ -189,16 +202,7 @@ export default function Grid({
 
       if (path === '/' || !match) {
         if (state.viewer) {
-          const mousePos = mousePositionRef.current
-          const origin = (mousePos && mousePos.x >= 0)
-            ? mousePos
-            : { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-          const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
-          const ranks = getBlockRanksByDistance(trulyVisible, origin)
-          staggerRef.current = { ranks, origin }
-          const maxRank = trulyVisible.length - 1
-          const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
-          play('close-viewer', { staggerDuration })
+          play('close-viewer', { staggerDuration: prepareStagger(pointerOrCenter()) })
         }
         return
       }
@@ -208,7 +212,7 @@ export default function Grid({
       if (!targetSeries || !targetSeries.images) return
 
       const idx = indexStr ? Math.max(0, parseInt(indexStr, 10) - 1) : 0
-      const newViewerData = buildViewerData(targetSeries, idx, getTitle)
+      const newViewerData = buildViewerData(targetSeries, idx, title)
 
       if (state.viewer) {
         set({ viewer: newViewerData })
@@ -225,9 +229,7 @@ export default function Grid({
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-    // getTitle est intentionnellement omis (closure stable, comportement préservé avec l'existant)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.viewer, series, visibleBlocks, play, set])
+  }, [state.viewer, series, play, set, title, prepareStagger])
 
   const handleImageClick = useCallback((imageId: string, clickPosition: { x: number; y: number }) => {
     if (state.grid === 'fading-out' || state.grid === 'fading-in') return
@@ -238,16 +240,9 @@ export default function Grid({
     const fullSeries = series.find(s => s._id === clickedImage.seriesId)
     if (!fullSeries || !fullSeries.images) return
 
-    const viewerData = buildViewerData(fullSeries, clickedImage.indexInSeries, getTitle)
+    const viewerData = buildViewerData(fullSeries, clickedImage.indexInSeries, title)
 
-    const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
-    const ranks = getBlockRanksByDistance(trulyVisible, clickPosition)
-    staggerRef.current = { ranks, origin: clickPosition }
-
-    const maxRank = trulyVisible.length - 1
-    const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
-
-    play('open-viewer', { staggerDuration, data: { viewer: viewerData } })
+    play('open-viewer', { staggerDuration: prepareStagger(clickPosition), data: { viewer: viewerData } })
     track('viewer-open', { source: 'grid' })
 
     if (fullSeries.slug) {
@@ -256,27 +251,15 @@ export default function Grid({
         : `/${fullSeries.slug}`
       window.history.pushState({}, '', url)
     }
-  }, [images, series, state.grid, visibleBlocks, play])
+  }, [images, series, state.grid, play, title, prepareStagger])
 
   const handleCloseViewer = useCallback(() => {
-    const mousePos = mousePositionRef.current
-    const origin = (mousePos && mousePos.x >= 0)
-      ? mousePos
-      : { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-
-    const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
-    const ranks = getBlockRanksByDistance(trulyVisible, origin)
-    staggerRef.current = { ranks, origin }
-
-    const maxRank = trulyVisible.length - 1
-    const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
-
-    play('close-viewer', { staggerDuration })
+    play('close-viewer', { staggerDuration: prepareStagger(pointerOrCenter()) })
 
     if (window.location.pathname !== '/') {
       window.history.pushState({}, '', '/')
     }
-  }, [visibleBlocks, play])
+  }, [play, prepareStagger])
 
   const handleViewerNext = useCallback(() => {
     if (!state.viewer) return
@@ -295,34 +278,13 @@ export default function Grid({
 
   const handleMenuOpen = useCallback((clickPosition: { x: number; y: number }) => {
     if (state.grid === 'fading-out' || state.grid === 'fading-in' || state.menu) return
-
-    const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
-    const ranks = getBlockRanksByDistance(trulyVisible, clickPosition)
-    staggerRef.current = { ranks, origin: clickPosition }
-
-    const maxRank = trulyVisible.length - 1
-    const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
-
-    play('open-menu', { staggerDuration })
-  }, [state.grid, state.menu, visibleBlocks, play])
+    play('open-menu', { staggerDuration: prepareStagger(clickPosition) })
+  }, [state.grid, state.menu, play, prepareStagger])
 
   const handleMenuClose = useCallback(() => {
     scrollToSeries(null)
-
-    const mousePos = mousePositionRef.current
-    const origin = (mousePos && mousePos.x >= 0)
-      ? mousePos
-      : { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-
-    const trulyVisible = filterTrulyVisibleBlocks(visibleBlocks, window.innerWidth, window.innerHeight)
-    const ranks = getBlockRanksByDistance(trulyVisible, origin)
-    staggerRef.current = { ranks, origin }
-
-    const maxRank = trulyVisible.length - 1
-    const staggerDuration = (maxRank * MOTION_CONFIG.STAGGER_OFFSET) + MOTION_CONFIG.STAGGER_ITEM_FADE
-
-    play('close-menu', { staggerDuration })
-  }, [scrollToSeries, visibleBlocks, play])
+    play('close-menu', { staggerDuration: prepareStagger(pointerOrCenter()) })
+  }, [scrollToSeries, play, prepareStagger])
 
   const dragRef = useDrag({ onDrag: handleDrag })
 
@@ -333,92 +295,15 @@ export default function Grid({
     dragRef.current = element
   }
 
-  const findBlockAtPoint = useCallback((blocks: typeof visibleBlocks, point: { x: number; y: number }) => {
-    if (!point || point.x < 0 || point.y < 0) return null
-
-    for (const block of blocks) {
-      const { renderX, renderY, zoneWidth, zoneHeight } = block
-      if (point.x >= renderX && point.x <= renderX + zoneWidth &&
-          point.y >= renderY && point.y <= renderY + zoneHeight) {
-        return block
-      }
-    }
-    return null
-  }, [])
-
-  const findClosestBlock = useCallback((blocks: typeof visibleBlocks, refPoint: { x: number; y: number }) => {
-    if (!refPoint || blocks.length === 0) return null
-
-    let closest = null
-    let minDistance = Infinity
-
-    for (const block of blocks) {
-      const center = getBlockCenter(block)
-      const distance = getDistance(center, refPoint)
-      if (distance < minDistance) {
-        minDistance = distance
-        closest = block
-      }
-    }
-    return closest
-  }, [])
-
-  useEffect(() => {
-    if (state.menu) return
-
-    let activeBlock = null
-
-    if (isMobile) {
-      const centerPoint = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-      activeBlock = findClosestBlock(visibleBlocks, centerPoint)
-    } else {
-      const mousePos = mousePositionRef.current
-      if (mousePos.x < 0 || mousePos.y < 0) {
-        setHoveredImage(null)
-        setHoveredBgColor(null)
-        return
-      }
-      activeBlock = findBlockAtPoint(visibleBlocks, mousePos)
-    }
-
-    if (activeBlock) {
-      const { image } = activeBlock
-      setHoveredImage({
-        seriesTitle: getTitle(image.seriesTitle),
-        indexInSeries: image.indexInSeries,
-        totalInSeries: image.totalInSeries
-      })
-      setHoveredBgColor(image.backgroundColor || null)
-    } else {
-      setHoveredImage(null)
-      setHoveredBgColor(null)
-    }
-  }, [visibleBlocks, isMobile, findBlockAtPoint, findClosestBlock, state.menu])
-
+  // Position souris côté page : point de départ de la vague à la fermeture
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isMobile) return
     mousePositionRef.current = { x: e.clientX, y: e.clientY }
-    if (state.menu) return
-    const activeBlock = findBlockAtPoint(visibleBlocks, { x: e.clientX, y: e.clientY })
-    if (activeBlock) {
-      const { image } = activeBlock
-      setHoveredImage({
-        seriesTitle: getTitle(image.seriesTitle),
-        indexInSeries: image.indexInSeries,
-        totalInSeries: image.totalInSeries
-      })
-      setHoveredBgColor(image.backgroundColor || null)
-    } else {
-      setHoveredImage(null)
-      setHoveredBgColor(null)
-    }
-  }, [isMobile, visibleBlocks, findBlockAtPoint, state.menu])
+  }, [isMobile])
 
   const handleMouseLeave = useCallback(() => {
     if (isMobile) return
     mousePositionRef.current = { x: -1, y: -1 }
-    setHoveredImage(null)
-    setHoveredBgColor(null)
   }, [isMobile])
 
   if (!isReady || images.length === 0) {
@@ -428,16 +313,6 @@ export default function Grid({
       </main>
     )
   }
-
-  // Type pour Portable Text
-  type PortableTextBlock = {
-    _type: string
-    _key: string
-    children?: { _type: string; text: string; marks?: string[] }[]
-    markDefs?: { _type: string; _key: string; href?: string }[]
-    style?: string
-  }
-  type LocalizedRichText = { fr: PortableTextBlock[]; en: PortableTextBlock[] } | PortableTextBlock[] | string
 
   const viewerState = state.viewer as ViewerData | null
 
@@ -458,10 +333,9 @@ export default function Grid({
       )}
 
       <div className="grid-canvas">
-        {visibleBlocks.map((block) => {
+        {blocks.map((block) => {
           const ranks = staggerRef.current.ranks
           const rank = ranks?.get(block.key)
-          const maxRank = ranks ? ranks.size - 1 : 0
 
           let animationDelay = 0
           if (rank !== undefined) {
@@ -481,11 +355,11 @@ export default function Grid({
             <GridBlock
               key={block.key}
               block={block}
+              registerBlock={registerBlock}
               onImageClick={handleImageClick}
               isAnimatingOut={shouldAnimateOut}
               isAnimatingIn={shouldAnimateIn}
               animationDelay={animationDelay}
-              proximityScale={block.proximityScale}
               forceHidden={forceHidden}
               highlightedSeriesId={state.highlightedSeriesId}
               highlightTransitionDuration={state.highlightTransitionDuration}
@@ -557,7 +431,7 @@ export default function Grid({
               return
             }
 
-            const viewerData = buildViewerData(fullSeries, 0, getTitle)
+            const viewerData = buildViewerData(fullSeries, 0, title)
             track('viewer-open', { source: 'menu' })
 
             scrollToSeries(null)

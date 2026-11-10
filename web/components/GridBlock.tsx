@@ -1,28 +1,25 @@
 'use client'
 
+import { memo } from 'react'
 import { MOTION_CONFIG } from '@/config/motion'
 import { useI18n } from '@/lib/i18n'
 import type { GridImage } from '@/lib/data'
 
-// Type pour titre localisé
-type LocalizedString = { fr: string; en: string } | string
-
 interface Block {
+  key: string
   image: GridImage
-  renderX: number
-  renderY: number
   zoneWidth: number
   zoneHeight: number
-  isHidden: boolean
 }
 
 interface GridBlockProps {
   block: Block
+  /** Enregistre l'élément auprès du mur : la boucle y écrit position, visibilité et échelle. */
+  registerBlock: (key: string, el: HTMLElement | null) => void
   onImageClick?: (imageId: string, position: { x: number; y: number }) => void
   isAnimatingOut?: boolean
   isAnimatingIn?: boolean
   animationDelay?: number
-  proximityScale?: number
   forceHidden?: boolean
   highlightedSeriesId?: string | null
   highlightTransitionDuration?: number
@@ -32,29 +29,27 @@ interface GridBlockProps {
 
 /**
  * GridBlock - Affiche une image dans la grille
+ *
+ * La position (translate), la visibilité et l'échelle de proximité ne passent pas
+ * par React : la boucle du mur les écrit directement sur l'élément
+ * (hooks/useGridVirtualization.ts). React ne gère ici que l'apparence (fondus,
+ * surbrillance du menu, image), et ne redessine la vignette que si elle change.
  */
-export default function GridBlock({
+function GridBlock({
   block,
+  registerBlock,
   onImageClick,
   isAnimatingOut = false,
   isAnimatingIn = false,
   animationDelay = 0,
-  proximityScale = 1.0,
   forceHidden = false,
   highlightedSeriesId = null,
   highlightTransitionDuration = 450,
   menuOpen = false,
   isInitiallyVisible = false
 }: GridBlockProps) {
-  const { image, renderX, renderY, zoneWidth, zoneHeight, isHidden } = block
-  const { t } = useI18n()
-
-  // Helper pour extraire un titre localisé
-  const getTitle = (title: LocalizedString | undefined): string => {
-    if (!title) return ''
-    if (typeof title === 'string') return title
-    return t(title) || title.fr || ''
-  }
+  const { key, image, zoneWidth, zoneHeight } = block
+  const { title } = useI18n()
 
   const scale = image.scale || 0.80
   const availableWidth = zoneWidth * scale
@@ -81,7 +76,7 @@ export default function GridBlock({
 
   const offsetX = (zoneWidth - imageWidth) / 2
   const offsetY = (zoneHeight - imageHeight) / 2
-  const seriesTitle = getTitle(image.seriesTitle)
+  const seriesTitle = title(image.seriesTitle)
 
   let highlightOpacity = 1
   if (menuOpen) {
@@ -104,6 +99,7 @@ export default function GridBlock({
 
   return (
     <div
+      ref={(el) => registerBlock(key, el)}
       className={`grid-item ${isAnimatingOut ? 'fading-out' : ''} ${isAnimatingIn ? 'fading-in' : ''}`}
       data-series-slug={image.seriesSlug}
       style={{
@@ -112,9 +108,6 @@ export default function GridBlock({
         top: 0,
         width: `${zoneWidth}px`,
         height: `${zoneHeight}px`,
-        transform: `translate3d(${renderX}px, ${renderY}px, 0)`,
-        visibility: isHidden ? 'hidden' : 'visible',
-        pointerEvents: isHidden ? 'none' : 'auto',
         ...animationStyle
       }}
     >
@@ -126,7 +119,6 @@ export default function GridBlock({
           top: `${offsetY}px`,
           width: `${imageWidth}px`,
           height: `${imageHeight}px`,
-          transform: `scale(${proximityScale})`,
           transformOrigin: 'center center',
           willChange: 'transform',
           backfaceVisibility: 'hidden',
@@ -167,3 +159,5 @@ export default function GridBlock({
     </div>
   )
 }
+
+export default memo(GridBlock)
