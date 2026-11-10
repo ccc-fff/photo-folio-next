@@ -65,20 +65,26 @@ html                    → fond unique anime (transition 850ms)
 
 ### Composants cles
 - **useSequencer** : gere les transitions comme des timelines
-- **useGridVirtualization** : affiche uniquement les images visibles
-- **Grid.tsx** : composant principal, orchestre tout
+- **useGridVirtualization** : mur infini. React rend la liste des vignettes une fois par mise en page ; la boucle d'animation ecrit position / visibilite / echelle directement sur chaque element (`registerBlock`) et s'arrete quand rien ne bouge (`wake()` la relance). Ne JAMAIS remettre une position dans un state React : ca redessine toute la grille 60 fois par seconde.
+- **Grid.tsx** : composant principal, orchestre tout. Vague d'apparition : `prepareStagger()` (seul endroit de ce calcul).
+- **lib/localized.ts** : type `LocalizedString` + `resolveTitle()`, source unique ; dans les composants : `useI18n().title(...)`
+
+### Hygiene (demande FF 10/11/2026)
+- Avant d'ajouter un calcul : chercher s'il existe deja et l'appeler, pas le recopier.
+- Apres une modification : retirer ce qu'elle rend inutile ; `npx eslint app components hooks lib utils config` doit rester a 0 alerte (0 le 10/11/2026).
+- Hauteur d'ecran mobile : `100dvh` en CSS, pas de variable `--vh` calculee en JavaScript.
+
+### Hebergement
+- **Production : Vercel** (push sur `main` = deploiement), donnees Sanity.
+- **Cloudflare : migration prevue** pour ouvrir un e-shop dans une autre section du site (offre gratuite Vercel = usage non commercial). Pilote : branche `pilote-cloudflare` (`wrangler.jsonc`, `cloudflare/worker.js`), adresse de test `*.workers.dev`, aucun domaine attache. Ne rien fusionner dans `main` sans decision de FF.
 
 ---
 
 ## Prochaines etapes (TODO)
 
-### SEO & Routing
-- [ ] Pages dediees par serie (`/series/[slug]`)
-- [ ] Meta tags dynamiques (titre, description, og:image par serie)
-- [ ] Sitemap.xml
-- [ ] robots.txt
+Fait : pages par serie (`/[slug]`, `/[slug]/[n]`), meta dynamiques (`generateMetadata`), `sitemap.ts`, `robots.ts`, favicon, FR/EN (`lib/i18n.tsx`).
 
-### Optionnel
-- [ ] Favicon
-- [ ] Page contact
-- [ ] Traductions anglais (fichier TRADUCTIONS_ANGLAIS.md existe)
+- [ ] Safari iPhone : la barre d'adresse ne se reduit pas (la page ne defile pas, le mur est anime en JS) ; bas d'ecran masque — a diagnostiquer
+- [ ] Mesure de vitesse : cle API PageSpeed a creer (quota a 0)
+- [ ] Images via `/photos/` : jamais en cache Vercel (+40-60 ms par image, mesure 15/09/2026)
+- [ ] E-shop + migration Cloudflare (voir Hebergement)
