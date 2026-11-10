@@ -98,9 +98,7 @@ interface PlayParams {
 
 export function useSequencer(initialState: SequencerState) {
   const [state, setState] = useState(initialState)
-  const [isPlaying, setIsPlaying] = useState(false)
   const timeoutsRef = useRef<NodeJS.Timeout[]>([])
-  const currentSequenceRef = useRef<string | null>(null)
 
   const clearTimeouts = useCallback(() => {
     timeoutsRef.current.forEach(clearTimeout)
@@ -121,12 +119,8 @@ export function useSequencer(initialState: SequencerState) {
     }
 
     clearTimeouts()
-    currentSequenceRef.current = sequenceName
-    setIsPlaying(true)
 
     const { staggerDuration = 0, data = {} } = params
-
-    let maxDelay = 0
 
     sequence.forEach(step => {
       let delay = 0
@@ -139,8 +133,6 @@ export function useSequencer(initialState: SequencerState) {
         delay = step.at
       }
 
-      maxDelay = Math.max(maxDelay, delay)
-
       const timeout = setTimeout(() => {
         setState(prev => ({
           ...prev,
@@ -151,13 +143,6 @@ export function useSequencer(initialState: SequencerState) {
 
       timeoutsRef.current.push(timeout)
     })
-
-    const endTimeout = setTimeout(() => {
-      setIsPlaying(false)
-      currentSequenceRef.current = null
-    }, maxDelay + 50)
-
-    timeoutsRef.current.push(endTimeout)
   }, [clearTimeouts])
 
   const set = useCallback((newState: Partial<SequencerState>) => {
@@ -168,7 +153,5 @@ export function useSequencer(initialState: SequencerState) {
     state,
     play,
     set,
-    isPlaying,
-    currentSequence: currentSequenceRef.current,
   }
 }

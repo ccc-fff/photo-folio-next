@@ -7,10 +7,8 @@
 import { client, urlFor } from './sanity'
 import { prettyImageUrl, imageFileName } from './prettyImageUrl'
 import { SERIES_QUERY, ABOUT_QUERY, SITE_SETTINGS_QUERY } from './queries'
-
-// Types pour champs localisés (fr/en)
-type LocalizedString = { fr: string; en: string } | string
-type LocalizedText = { fr: string; en: string } | string
+import type { SanityImageSource } from '@sanity/image-url'
+import type { LocalizedString } from './localized'
 
 // Type pour Portable Text (rich text)
 type PortableTextBlock = {
@@ -63,7 +61,7 @@ export interface Series {
   images: Array<{
     _key: string
     alt: string
-    asset: any
+    asset: SanityImageSource
     width: number
     height: number
   }>

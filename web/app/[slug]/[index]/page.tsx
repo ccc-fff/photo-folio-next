@@ -86,8 +86,6 @@ export default async function SeriesImagePage({ params }: Props) {
       images={images}
       about={about}
       defaultBackgroundColor={defaultBackgroundColor || undefined}
-      initialOpenSlug={slug}
-      initialOpenIndex={idx0}
       initialViewerData={initialViewer}
     />
   )

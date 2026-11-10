@@ -1,8 +1,9 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useSyncExternalStore, ReactNode } from 'react'
+import { resolveTitle, type Locale, type LocalizedString } from './localized'
 
-export type Locale = 'fr' | 'en'
+export type { Locale } from './localized'
 
 // Type pour les champs localisés
 export type LocalizedField<T> = { fr: T; en: T } | undefined | null
@@ -11,33 +12,47 @@ interface I18nContextType {
   locale: Locale
   setLocale: (l: Locale) => void
   t: <T>(field: LocalizedField<T>) => T | undefined
+  /** Titre localisé (chaîne simple ou { fr, en }) — repli sur le français. */
+  title: (field: LocalizedString | undefined | null) => string
 }
 
 const I18nContext = createContext<I18nContextType | null>(null)
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('fr')
-  const [isHydrated, setIsHydrated] = useState(false)
+// La langue vit hors de React (localStorage + langue du navigateur) : on la lit
+// avec useSyncExternalStore. Le HTML statique est en français (getServerSnapshot),
+// la langue réelle s'applique à l'hydratation, comme avant.
+const LOCALE_EVENT = 'locale-change'
 
-  useEffect(() => {
-    // 1. Check localStorage
-    const saved = localStorage.getItem('locale') as Locale | null
-    if (saved === 'fr' || saved === 'en') {
-      setLocaleState(saved)
-    } else {
-      // 2. Detect browser language
-      const browserLang = navigator.language.slice(0, 2).toLowerCase()
-      if (browserLang === 'en') {
-        setLocaleState('en')
-      }
-    }
-    setIsHydrated(true)
-  }, [])
-
-  const setLocale = (l: Locale) => {
-    setLocaleState(l)
-    localStorage.setItem('locale', l)
+function readLocale(): Locale {
+  try {
+    const saved = localStorage.getItem('locale')
+    if (saved === 'fr' || saved === 'en') return saved
+  } catch {
+    // stockage indisponible (navigation privée stricte) : langue du navigateur
   }
+  return navigator.language.slice(0, 2).toLowerCase() === 'en' ? 'en' : 'fr'
+}
+
+function subscribe(onChange: () => void) {
+  window.addEventListener(LOCALE_EVENT, onChange)
+  window.addEventListener('storage', onChange)
+  return () => {
+    window.removeEventListener(LOCALE_EVENT, onChange)
+    window.removeEventListener('storage', onChange)
+  }
+}
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const locale = useSyncExternalStore<Locale>(subscribe, readLocale, () => 'fr')
+
+  const setLocale = useCallback((l: Locale) => {
+    try {
+      localStorage.setItem('locale', l)
+    } catch {
+      // stockage indisponible : le choix ne survivra pas au rechargement
+    }
+    window.dispatchEvent(new Event(LOCALE_EVENT))
+  }, [])
 
   const t = <T,>(field: LocalizedField<T>): T | undefined => {
     if (!field) return undefined
@@ -45,8 +60,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return field[locale] ?? field.fr
   }
 
+  const title = (field: LocalizedString | undefined | null) => resolveTitle(field, locale)
+
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale, t, title }}>
       {children}
     </I18nContext.Provider>
   )

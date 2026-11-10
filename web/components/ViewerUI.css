@@ -171,7 +171,6 @@ a.viewer-credit-name:hover {
 
 @media (max-width: 768px) {
   .viewer-ui {
-    height: calc(var(--vh, 1vh) * 100);
     height: 100dvh;
   }
 
@@ -238,7 +237,6 @@ a.viewer-credit-name:hover {
     right: 0;
     /* annule le centrage desktop (translateX(-50%)) : sinon le panneau sort d'une demi-largeur à gauche */
     transform: none;
-    height: calc(var(--vh, 1vh) * 100 - 80px);
     height: calc(100dvh - 80px);
     padding: var(--margin-mobile);
     padding-top: 0;

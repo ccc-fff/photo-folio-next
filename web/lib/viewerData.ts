@@ -1,22 +1,16 @@
 import { urlFor } from './sanity'
 import { prettyImageUrl, imageFileName } from './prettyImageUrl'
 import type { Series } from './data'
-
-type LocalizedString = { fr: string; en: string } | string
-
-function defaultTitle(title: LocalizedString | undefined): string {
-  if (!title) return ''
-  if (typeof title === 'string') return title
-  return title.fr || title.en || ''
-}
+import { resolveTitle, type LocalizedString } from './localized'
+import type { SanityImageSource } from '@sanity/image-url'
 
 export function buildViewerData(
   series: Series,
   currentIndex: number = 0,
   titleResolver?: (title: LocalizedString | undefined) => string
 ) {
-  const resolveTitle = titleResolver || defaultTitle
-  const imgBuilder = (asset: unknown, w: number, name: string) =>
+  const titleOf = titleResolver || ((title: LocalizedString | undefined) => resolveTitle(title))
+  const imgBuilder = (asset: SanityImageSource, w: number, name: string) =>
     prettyImageUrl(urlFor(asset).width(w).auto('format').url(), name)
 
   const seriesImages = series.images.map((img, i) => {
@@ -25,7 +19,7 @@ export function buildViewerData(
     id: img._key,
     url: imgBuilder(img.asset, 1800, fileName),
     srcSet: `${imgBuilder(img.asset, 1200, fileName)} 1200w, ${imgBuilder(img.asset, 1800, fileName)} 1800w, ${imgBuilder(img.asset, 2400, fileName)} 2400w`,
-    alt: img.alt || resolveTitle(series.title),
+    alt: img.alt || titleOf(series.title),
     seriesTitle: series.title,
     indexInSeries: i,
     totalInSeries: series.images.length

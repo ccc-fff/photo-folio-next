@@ -29,8 +29,11 @@ export function useDrag(options: UseDragOptions = {}) {
   const hasMoved = useRef(false)
   const velocity = useRef({ x: 0, y: 0 })
 
+  // Toujours appeler la dernière version de onDrag sans réinstaller les écouteurs
   const onDragRef = useRef(onDrag)
-  onDragRef.current = onDrag
+  useEffect(() => {
+    onDragRef.current = onDrag
+  }, [onDrag])
 
   useEffect(() => {
     const container = containerRef.current

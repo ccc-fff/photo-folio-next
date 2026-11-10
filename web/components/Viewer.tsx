@@ -6,7 +6,7 @@ import { track } from '@/lib/track'
 import './Viewer.css'
 
 // Type pour titre localisé
-type LocalizedString = { fr: string; en: string } | string
+import type { LocalizedString } from '@/lib/localized'
 
 interface ViewerImage {
   id: string
@@ -60,6 +60,7 @@ function useImagePreloader(images: ViewerImage[], currentIndex: number) {
     if (!images || images.length === 0) return
 
     let cancelled = false
+    const preloaded = preloadedRef.current
 
     const preload = (index: number) => {
       if (cancelled) return
@@ -68,11 +69,11 @@ function useImagePreloader(images: ViewerImage[], currentIndex: number) {
       if (!img) return
 
       const key = `${img.id}-${optimalWidth}`
-      if (preloadedRef.current.has(key)) return
+      if (preloaded.has(key)) return
 
       const loader = new Image()
       loader.src = getOptimalUrl(img)
-      preloadedRef.current.set(key, loader)
+      preloaded.set(key, loader)
     }
 
     preload(currentIndex)
@@ -114,7 +115,7 @@ function useImagePreloader(images: ViewerImage[], currentIndex: number) {
         idleCallbackRef.current = null
       }
       // Clear preloaded images to free memory (memory leak fix)
-      preloadedRef.current.clear()
+      preloaded.clear()
     }
   }, [images, currentIndex, getOptimalUrl, optimalWidth])
 
@@ -132,7 +133,7 @@ const getAnimProps = (element: AnimState | string | undefined, defaultDuration =
 }
 
 export default function Viewer({ images, currentIndex, viewerScale = 100, onNext, onPrev, elementStates = {} }: ViewerProps) {
-  const { t } = useI18n()
+  const { title } = useI18n()
   const imgAnim = getAnimProps(elementStates.image, 500, 'ease-out')
   const blurAnim = getAnimProps(elementStates.blur, 200, 'ease-out')
   const touchStartX = useRef<number | null>(null)
@@ -142,13 +143,6 @@ export default function Viewer({ images, currentIndex, viewerScale = 100, onNext
   // mouseleave sur le conteneur → le picto disparaît sans logique de coordination.
   const [cursorSide, setCursorSide] = useState<'left' | 'right' | null>(null)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
-
-  // Helper pour extraire un titre localisé
-  const getTitle = (title: LocalizedString | undefined): string => {
-    if (!title) return ''
-    if (typeof title === 'string') return title
-    return t(title) || title.fr || ''
-  }
 
   // Track quelle image est chargée (par ID pour éviter les race conditions)
   const [loadedImageId, setLoadedImageId] = useState<string | null>(null)
@@ -226,7 +220,7 @@ export default function Viewer({ images, currentIndex, viewerScale = 100, onNext
       >
         <img
           src={getOptimalUrl(currentImage)}
-          alt={currentImage?.alt || getTitle(currentImage?.seriesTitle) || ''}
+          alt={currentImage?.alt || title(currentImage?.seriesTitle) || ''}
           className="viewer-image"
           fetchPriority="high"
           onLoad={() => setLoadedImageId(currentImage?.id)}

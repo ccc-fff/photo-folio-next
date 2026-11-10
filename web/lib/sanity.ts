@@ -5,7 +5,7 @@
  * Les requêtes sont faites au moment du build, pas à chaque visite
  */
 import { createClient } from '@sanity/client'
-import { createImageUrlBuilder } from '@sanity/image-url'
+import { createImageUrlBuilder, type SanityImageSource } from '@sanity/image-url'
 
 // Configuration du client
 // En SSG, on utilise toujours le CDN car les données sont figées au build
@@ -25,6 +25,6 @@ const builder = createImageUrlBuilder({
 /**
  * Génère une URL d'image optimisée avec conversion WebP automatique
  */
-export function urlFor(source: any) {
+export function urlFor(source: SanityImageSource) {
   return builder.image(source)
 }
