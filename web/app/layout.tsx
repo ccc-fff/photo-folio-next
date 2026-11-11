@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
@@ -9,6 +9,13 @@ const inter = localFont({
   display: "swap",
   weight: "300 500",
 });
+
+// viewport-fit=cover : nécessaire pour que la grille puisse passer sous les barres de Safari (iPhone)
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Frédéric Fornini — Photographe",

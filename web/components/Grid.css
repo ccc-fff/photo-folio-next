@@ -2,9 +2,11 @@
 
 .grid-container {
   width: 100vw;
-  height: 100lvh;
+  /* tout le document, débords compris (0 en desktop) : la grille est peinte sous les barres Safari */
+  height: calc(100lvh + var(--bleed-top) + var(--bleed-bottom));
   overflow: hidden;
   position: relative;
+  touch-action: none;
   background: transparent;
   cursor: grab;
   user-select: none;
@@ -26,6 +28,16 @@
 
 .grid-container::-webkit-scrollbar {
   display: none;
+}
+
+/* La scène a la géométrie de l'écran ; la grille en déborde vers le haut et le bas,
+   le reste (Header, Viewer, ViewerUI) s'y positionne comme avant. */
+.grid-stage {
+  position: absolute;
+  top: var(--bleed-top);
+  left: 0;
+  width: 100%;
+  height: 100lvh;
 }
 
 .grid-canvas {
@@ -94,9 +106,4 @@
   }
 }
 
-@media (max-width: 768px) {
-  .grid-container {
-    /* dvh = dynamic viewport height, s'adapte quand la barre URL apparaît/disparaît */
-    height: 100dvh;
-  }
-}
+

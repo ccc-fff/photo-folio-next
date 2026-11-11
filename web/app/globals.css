@@ -32,6 +32,31 @@ html {
   transition: background-color 850ms ease;
 }
 
+/*
+ * Grille plein écran sur iPhone (mesuré sur l'iPhone de FF, Safari iOS 26, 11/11/2026) :
+ * Safari coupe tout élément fixe ou « sticky » au-dessus de sa barre du bas et sous
+ * l'heure ; seul le contenu d'une page défilée y est peint. Le document est donc un
+ * peu plus haut que l'écran (débords haut et bas), arrêté à --bleed-top au chargement
+ * (useGridVirtualization) ; le doigt ne le fait jamais défiler (touch-action: none
+ * sur .grid-container). Desktop : débords à 0, rien ne change.
+ * Pages de test : public/diag/ (static.html = ce montage).
+ */
+:root {
+  --bleed-top: 0px;
+  --bleed-bottom: 0px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --bleed-top: 80px;
+    --bleed-bottom: 200px;
+  }
+
+  html {
+    overscroll-behavior: none;
+  }
+}
+
 body {
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 300;
@@ -40,4 +65,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
   background: transparent;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow: visible;
+    height: calc(100lvh + var(--bleed-top) + var(--bleed-bottom));
+  }
 }

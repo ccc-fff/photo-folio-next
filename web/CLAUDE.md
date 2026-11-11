@@ -74,6 +74,11 @@ html                    → fond unique anime (transition 850ms)
 - Apres une modification : retirer ce qu'elle rend inutile ; `npx eslint app components hooks lib utils config` doit rester a 0 alerte (0 le 10/11/2026).
 - Hauteur d'ecran mobile : `100dvh` en CSS, pas de variable `--vh` calculee en JavaScript.
 
+### iPhone : grille sous les barres Safari (mesure 11/11/2026, Safari iOS 26)
+- Safari coupe tout element `fixed` ou `sticky` au-dessus de sa barre du bas et sous l'heure ; `viewport-fit=cover` seul ne change rien (marges a 0 mesurees) ; `100dvh`/`100lvh` ne suffisent pas.
+- Seul le contenu d'une page **defilee** est peint partout. Montage retenu (mobile <= 768px) : document plus haut que l'ecran (`--bleed-top` 80px, `--bleed-bottom` 200px, `app/globals.css`), arrete a `--bleed-top` au chargement (`settleDocumentScroll`), `touch-action: none` sur `.grid-container` ; `.grid-stage` garde la geometrie de l'ecran pour tout le reste. Desktop : debords a 0.
+- Le serveur de dev peut ne pas reprendre un fichier modifie (dossier Proton) : verifier le CSS servi avant de conclure a un echec, relancer `next dev` au besoin.
+
 ### Hebergement
 - **Production : Vercel** (push sur `main` = deploiement), donnees Sanity.
 - **Cloudflare : migration prevue** pour ouvrir un e-shop dans une autre section du site (offre gratuite Vercel = usage non commercial). Pilote : branche `pilote-cloudflare` (`wrangler.jsonc`, `cloudflare/worker.js`), adresse de test `*.workers.dev`, aucun domaine attache. Ne rien fusionner dans `main` sans decision de FF.
@@ -84,7 +89,7 @@ html                    → fond unique anime (transition 850ms)
 
 Fait : pages par serie (`/[slug]`, `/[slug]/[n]`), meta dynamiques (`generateMetadata`), `sitemap.ts`, `robots.ts`, favicon, FR/EN (`lib/i18n.tsx`).
 
-- [ ] Safari iPhone : la barre d'adresse ne se reduit pas (la page ne defile pas, le mur est anime en JS) ; bas d'ecran masque — a diagnostiquer
+- [ ] Safari iPhone : la barre d'adresse ne se reduit pas (la page ne defile jamais ; elle se reduit sur une page qui defile vraiment, mesure 11/11)
 - [ ] Mesure de vitesse : cle API PageSpeed a creer (quota a 0)
 - [ ] Images via `/photos/` : jamais en cache Vercel (+40-60 ms par image, mesure 15/09/2026)
 - [ ] E-shop + migration Cloudflare (voir Hebergement)

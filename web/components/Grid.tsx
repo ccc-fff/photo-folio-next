@@ -288,12 +288,16 @@ export default function Grid({
 
   const dragRef = useDrag({ onDrag: handleDrag })
 
-  const combinedRef = useRef<HTMLElement | null>(null)
-  const setRefs = (element: HTMLElement | null) => {
-    combinedRef.current = element
-    virtualizationRef.current = element
+  // main (dragRef) couvre tout le document, marges de débord comprises ; la scène
+  // (virtualizationRef) garde la géométrie de l'écran : tous les calculs de la
+  // grille et la position des calques (Header, Viewer…) en dépendent.
+  const setMainRef = (element: HTMLElement | null) => {
     dragRef.current = element
   }
+  const setStageRef = (element: HTMLDivElement | null) => {
+    virtualizationRef.current = element
+  }
+
 
   // Position souris côté page : point de départ de la vague à la fermeture
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -308,8 +312,10 @@ export default function Grid({
 
   if (!isReady || images.length === 0) {
     return (
-      <main ref={setRefs} className="grid-container">
-        <div className="grid-loading">Chargement...</div>
+      <main ref={setMainRef} className="grid-container">
+        <div ref={setStageRef} className="grid-stage">
+          <div className="grid-loading">Chargement...</div>
+        </div>
       </main>
     )
   }
@@ -318,7 +324,7 @@ export default function Grid({
 
   return (
     <main
-      ref={setRefs}
+      ref={setMainRef}
       className={`grid-container ${viewerState ? 'viewer-active' : ''}`}
       style={{
         // CSS variables pour les composants enfants (Menu mobile, ViewerUI mobile)
@@ -328,6 +334,7 @@ export default function Grid({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      <div ref={setStageRef} className="grid-stage">
       {state.header && (
         <Header hoveredImage={hoveredImage} onMenuClick={handleMenuOpen} />
       )}
@@ -463,6 +470,7 @@ export default function Grid({
           }}
         />
       )}
+      </div>
     </main>
   )
 }

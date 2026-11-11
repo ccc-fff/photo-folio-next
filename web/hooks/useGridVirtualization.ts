@@ -72,6 +72,25 @@ interface Options {
 }
 
 const VISIBILITY_BUFFER = 100
+
+// Débords sous les barres Safari (mobile) : variables CSS --bleed-top / --bleed-bottom
+// (app/globals.css), 0 en desktop. La grille couvre aussi ces bandes.
+function readBleeds() {
+  if (typeof window === 'undefined') return { bleedTop: 0, bleedBottom: 0 }
+  const cs = getComputedStyle(document.documentElement)
+  return {
+    bleedTop: parseFloat(cs.getPropertyValue('--bleed-top')) || 0,
+    bleedBottom: parseFloat(cs.getPropertyValue('--bleed-bottom')) || 0,
+  }
+}
+
+// Le document est arrêté au début de la scène : Safari peint alors la page sous ses barres.
+function settleDocumentScroll() {
+  const { bleedTop } = readBleeds()
+  if (bleedTop > 0 && Math.round(window.scrollY) !== bleedTop) {
+    window.scrollTo({ top: bleedTop, left: 0, behavior: 'instant' })
+  }
+}
 const SCALE_EPSILON = 0.0005
 
 // Écrit la position d'une vignette sur son élément (le cadre externe porte la
@@ -111,6 +130,7 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
     const blockWidth = BLOCK_WIDTH_VH * vh
     const blockHeight = BLOCK_HEIGHT_VH * vh
     return {
+      ...readBleeds(),
       blockWidth,
       blockHeight,
       zoneWidth: blockWidth * BLOCKS_PER_IMAGE,
@@ -121,7 +141,7 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
   }, [BLOCK_WIDTH_VH, BLOCK_HEIGHT_VH, BLOCKS_PER_IMAGE])
 
   const [sizes, setSizes] = useState(() => calculateSizes())
-  const { blockWidth, blockHeight, zoneWidth, zoneHeight, viewportWidth, viewportHeight } = sizes
+  const { blockWidth, blockHeight, zoneWidth, zoneHeight, viewportWidth, viewportHeight, bleedTop, bleedBottom } = sizes
 
   const effectiveWidth = Math.max(1, GRID_WIDTH - 1)
   const effectiveHeight = Math.max(1, GRID_HEIGHT - 1)
@@ -130,16 +150,19 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
 
   const wallLayout = useMemo(() => {
     const copiesX = Math.ceil((viewportWidth + zoneWidth) / GALLERY_WIDTH)
-    const copiesY = Math.ceil((viewportHeight + zoneHeight) / GALLERY_HEIGHT)
+    // le mur couvre aussi la bande sous la barre du bas (bleedBottom)
+    const copiesY = Math.ceil((viewportHeight + bleedBottom + zoneHeight) / GALLERY_HEIGHT)
     return {
       viewportWidth,
       viewportHeight,
+      bleedTop,
+      bleedBottom,
       copiesX,
       copiesY,
       wallWidth: copiesX * GALLERY_WIDTH,
       wallHeight: copiesY * GALLERY_HEIGHT
     }
-  }, [viewportWidth, viewportHeight, zoneWidth, zoneHeight, GALLERY_WIDTH, GALLERY_HEIGHT])
+  }, [viewportWidth, viewportHeight, bleedTop, bleedBottom, zoneWidth, zoneHeight, GALLERY_WIDTH, GALLERY_HEIGHT])
 
   const blocks = useMemo(() => {
     const list: LayoutBlock[] = []
@@ -198,7 +221,7 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
   // Calcule les positions de toutes les vignettes pour l'offset courant, les écrit
   // sur le DOM, signale la vignette active. Renvoie vrai si une échelle bouge encore.
   const applyFrame = (): boolean => {
-    const { viewportWidth: vw, viewportHeight: vh, wallWidth, wallHeight } = wallLayout
+    const { viewportWidth: vw, viewportHeight: vh, bleedTop: bTop, bleedBottom: bBottom, wallWidth, wallHeight } = wallLayout
     const offset = offsetRef.current
     const wrappedOffsetX = ((offset.x % wallWidth) + wallWidth) % wallWidth
     const wrappedOffsetY = ((offset.y % wallHeight) + wallHeight) % wallHeight
@@ -222,7 +245,7 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
       if (renderY > wallHeight - block.zoneHeight) renderY -= wallHeight
 
       const inViewX = renderX + block.zoneWidth > -VISIBILITY_BUFFER && renderX < vw + VISIBILITY_BUFFER
-      const inViewY = renderY + block.zoneHeight > -VISIBILITY_BUFFER && renderY < vh + VISIBILITY_BUFFER
+      const inViewY = renderY + block.zoneHeight > -VISIBILITY_BUFFER - bTop && renderY < vh + VISIBILITY_BUFFER + bBottom
 
       const placed = { ...block, renderX, renderY }
       const targetScale = paused
@@ -387,11 +410,14 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
     applyFrame()
     setIsReady(true)
     wake()
+    settleDocumentScroll()
+    window.addEventListener('load', settleDocumentScroll)
     const positions = positionsRef.current
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
       frameRef.current = null
       positions.clear()
+      window.removeEventListener('load', settleDocumentScroll)
     }
     // Montage seulement : step et applyFrame sont relus via stepRef ensuite
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -452,6 +478,7 @@ export function useGridVirtualization(gridConfig: GridConfig, config: Config, op
     const handleResize = () => {
       setSizes(calculateSizes())
       velocityRef.current = { x: 0, y: 0 }
+      settleDocumentScroll()
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
