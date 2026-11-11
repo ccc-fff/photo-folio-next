@@ -23,6 +23,16 @@
       "source": "/vernissage/invitation/",
       "destination": "/vernissage/exposition",
       "permanent": false
+    },
+    {
+      "source": "/qr/entrailles",
+      "destination": "/entrailles",
+      "permanent": false
+    },
+    {
+      "source": "/qr/dans-la-rue",
+      "destination": "/dans-la-rue",
+      "permanent": false
     }
   ]
 }
