@@ -6,13 +6,15 @@
 
 ## Entrailles
 
-For a long time, I saw cars as nothing but trivial objects, visual pollution resulting from their omnipresence. It was a car at the end of its life that led me to a scrapyard where, paradoxically, these carcasses revealed their unexpected beauty. In these stigmata and scars, I discovered the character forged by their histories. In our streets, our parking lots, our peripheries.
+For a long time, I saw cars as nothing more than trivial objects, a visual pollution born of their omnipresence. It was an automobile at the end of its road that led me to a scrapyard where, paradoxically, these wrecks revealed an unexpected beauty to me. In their stigmata and scars, I discovered a character forged by their histories. In our streets, our car parks, our outskirts.
 
-These metal skins, both refuges and witnesses, tell our lives in fragments. Forgotten objects, improvised modifications, traces of wear become so many clues to our existences. Each interior transformed by its occupants or altered by time becomes the matrix of our own metamorphoses.
+These metal skins, both shelters and witnesses, tell our lives in fragments. Forgotten objects, makeshift alterations, traces of wear become so many clues to our existences. Each interior, transformed by its occupants or altered by time, becomes the matrix of our own metamorphoses.
 
-One could smile at these haphazard arrangements, these clumsy attempts at personalization. Yet these interiors reflect the precariousness of our existences filled with compensatory objects. They testify to our erratic journeys, our illusory need for control, while the accident always lurks, ready to collapse like a house of cards our most meticulous plans.
+One might smile at these haphazard arrangements, these clumsy attempts at personalisation. Yet they reflect back the precariousness of lives filled with compensatory objects — witnesses to our erratic paths, to our illusory need for control, while the accident always lies in wait, ready to bring down our most meticulous plans like a house of cards.
 
-Entrailles reveals, through these banal details buried under the weight of their overabundance, our aspirations, flaws, and habits.
+Through these vehicles, buried under the weight of their own abundance, Entrailles reveals our aspirations, quirks and habitus.
+
+(v2 du 30/10/2026, validée FF — publiée dans Sanity le 30/10 ; historique : CoT `projets/photo/ENTRAILLES/communication/texte-intention-versions.md`)
 
 ---
 

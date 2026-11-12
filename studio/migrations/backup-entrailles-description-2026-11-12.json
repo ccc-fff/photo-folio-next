@@ -1,0 +1,143 @@
+{
+  "description": {
+    "en": [
+      {
+        "_key": "igrs3r1udu",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "jxnior45w4",
+            "_type": "span",
+            "marks": [],
+            "text": "For a long time, I saw cars as nothing more than trivial objects, a visual pollution born of their omnipresence. It was an automobile at the end of its road that led me to a scrapyard where, paradoxically, these wrecks revealed an unexpected beauty to me. In their stigmata and scars, I discovered a character forged by their histories. In our streets, our car parks, our outskirts."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "x0ywq8xr9m",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "51boatlwl4",
+            "_type": "span",
+            "marks": [],
+            "text": "These metal skins, both shelters and witnesses, tell our lives in fragments. Forgotten objects, makeshift alterations, traces of wear become so many clues to our existences. Each interior, transformed by its occupants or altered by time, becomes the matrix of our own metamorphoses."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "fblwfiy06v",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "q5quyv8tf4",
+            "_type": "span",
+            "marks": [],
+            "text": "One might smile at these haphazard arrangements, these clumsy attempts at personalisation. Yet they reflect back the precariousness of lives filled with compensatory objects — witnesses to our erratic paths, to our illusory need for control, while the accident always lies in wait, ready to bring down our most meticulous plans like a house of cards."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "lsdk7dsceb",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "mwqc19il5i",
+            "_type": "span",
+            "marks": [],
+            "text": "Through these vehicles, buried under the weight of their own abundance, "
+          },
+          {
+            "_key": "atsuviiqq7",
+            "_type": "span",
+            "marks": [
+              "em"
+            ],
+            "text": "Entrailles"
+          },
+          {
+            "_key": "mpncn4kgqm",
+            "_type": "span",
+            "marks": [],
+            "text": " reveals our aspirations, failings and habitus."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "fr": [
+      {
+        "_key": "8pt4ifo927",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "io1esblk20",
+            "_type": "span",
+            "marks": [],
+            "text": "Longtemps, je n'ai vu dans les voitures que des objets triviaux, une pollution visuelle conséquence de leur omniprésence. C'est une automobile en fin de course qui m'a conduit dans une casse où, paradoxalement, ces carcasses m'ont révélé leur beauté inattendue. Dans ces stigmates et cicatrices, j'ai découvert le caractère forgé par leurs histoires. Dans nos rues, nos parkings, nos périphéries."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "36myb1502y",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "6dm6sauku6",
+            "_type": "span",
+            "marks": [],
+            "text": "Ces peaux de métal, à la fois refuges et témoins, racontent nos vies par fragments. Les objets oubliés, les modifications improvisées, les traces d'usure deviennent autant d'indices de nos existences. Chaque habitacle transformé par ses occupants ou altéré par le temps se fait la matrice de nos propres métamorphoses."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "essf238387",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "hrao4fjp08",
+            "_type": "span",
+            "marks": [],
+            "text": "On pourrait sourire de ces aménagements hasardeux, de ces tentatives maladroites de personnalisation. Pourtant, ils nous renvoient à la précarité de nos existences peuplées d'objets compensatoires — témoins de nos parcours erratiques, de notre besoin illusoire de contrôle, alors que l'accident guette toujours, prêt à faire s'effondrer, comme un château de cartes, nos plans les plus minutieux."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "iwp2pfz2gp",
+        "_type": "richTextBlock",
+        "children": [
+          {
+            "_key": "4pc3ajg1jx",
+            "_type": "span",
+            "marks": [
+              "em"
+            ],
+            "text": "Entrailles"
+          },
+          {
+            "_key": "bqkevaj7rg",
+            "_type": "span",
+            "marks": [],
+            "text": " révèle, à travers ces véhicules enfouis sous le poids de leur surabondance, nos aspirations, travers et habitus."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ]
+  },
+  "_rev": "rBO9wv9623DkzPRqu7kk81"
+}
